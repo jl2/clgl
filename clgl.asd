@@ -9,6 +9,7 @@
   :depends-on (#:alexandria
                #:cl-glfw3
                #:cl-opengl
+               #:bordeaux-threads
                #:trivial-main-thread)
   :serial t
   :components ((:file "package")
