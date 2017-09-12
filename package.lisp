@@ -10,22 +10,9 @@
    #:create-scene
    #:scene
    #:viewport
-   #:light
-   #:box
-   #:rectangle
-   #:triangle
-   #:line
+   #:add-point-coords
+   #:add-point
    #:point
-   #:color
-   #:red
-   #:green
-   #:blue
-   #:alpha
-   #:x
-   #:y
-   #:z
-   #:lights
-   #:objects
-   #:shader-input
-   #:shader))
+   #:add-pt
+   #:force-redraw))
 

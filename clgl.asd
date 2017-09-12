@@ -15,5 +15,8 @@
                #:3d-matrices)
   :serial t
   :components ((:file "package")
-               (:file "clgl")))
+               (:file "clgl")
+               (:file "opengl-object")
+               (:file "primitive-container")
+               (:file "materials")))
 
