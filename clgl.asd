@@ -10,7 +10,9 @@
                #:cl-glfw3
                #:cl-opengl
                #:bordeaux-threads
-               #:trivial-main-thread)
+               #:trivial-main-thread
+               #:3d-vectors
+               #:3d-matrices)
   :serial t
   :components ((:file "package")
                (:file "clgl")))
