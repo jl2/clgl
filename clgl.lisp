@@ -39,16 +39,18 @@
    (phi :initarg :phi :initform (/ pi 4))))
 
 (defmethod get-transform-matrix ((view spherical-viewport))
-  (3d-matrices:marr4 (meye 4)))
+  (marr4 (meye 4)))
 
 (defclass look-at-viewport ()
-  ((eye :initarg :eye :initform (3d-vectors:vec3 10.0f0 10.0f0 10.0f0))
-   (center :initarg :center :initform (3d-vectors:vec3 0.0f0 0.0f0 0.0f0))
+  ((eye :initarg :eye :initform (vec3 0.0f0 0.0f0 10.0f0))
+   (center :initarg :center :initform (vec3 0.0f0 0.0f0 0.0f0))
    (up :initarg :up :initform +vy+)))
 
 (defmethod get-transform-matrix ((view look-at-viewport))
   (with-slots (eye center up) view
-    (3d-matrices:mlookat eye center up)))
+    (let ((result (marr4 (minv (nmlookat (m* 0.125 (meye 4)) eye center up)))))
+      ;;(format t "~a~%" result)
+      result)))
 
 (defclass scene ()
   ((viewport :initarg :viewport :initform (make-instance 'look-at-viewport))
@@ -61,11 +63,11 @@
   `(bt:with-lock-held ((slot-value ,scene 'clgl::lock))
      ,@body))
 
-(defun add-pt (scene x y z red green blue alpha)
-  (with-scene-lock (scene)
-    (with-slots (objects modified) scene
-      (add-point-coords (car objects) x y z red green blue alpha)
-      (setf modified t))))
+(defmacro with-primitives ((scene prims) &body body)
+  `(with-scene-lock (,scene)
+     (let ((,prims (car (slot-value ,scene 'objects))))
+       ,@body)
+     (setf (slot-value ,scene 'clgl::modified) t)))
 
 (defun force-redraw (scene)
   (with-scene-lock (scene)
@@ -73,17 +75,14 @@
   
 (defun render (scene)
   (with-slots (objects viewport modified lock) scene
-    (when modified
-      (format t "Scene was modified~%")
-      (dolist (object objects)
-        (fill-buffers object))
-      (setf modified nil))
     (dolist (object objects)
+      (when modified
+        (fill-buffers object)
+        (setf modified nil))
       (gl:enable :line-smooth :polygon-smooth
                  :depth-test :depth-clamp)
       (gl:clear-color 0.0 0.0 0.0 1.0)
       (gl:clear :color-buffer :depth-buffer)
-      
       (render-buffers object viewport))))
 
 (defgeneric cleanup (object))
@@ -121,7 +120,7 @@
 
         (setf %gl:*gl-get-proc-address* #'get-proc-address)
         (set-key-callback 'quit-on-escape)
-        (gl:clear-color 0 0 0 0)
+        (gl:clear-color 0 0 0 1.0)
 
         ;; The 'event loop'
         (loop until (window-should-close-p)
@@ -133,8 +132,39 @@
         ;; Finally clean up
         (cleanup scene)))))
 
-(defun show-scene (scene &optional (in-main-thread t))
+(defun view-scene (scene &optional (in-main-thread t))
   (if in-main-thread
       (trivial-main-thread:with-body-in-main-thread ()
         (scene-viewer scene))
       (scene-viewer scene)))
+
+(defun create-and-view (&optional (background nil))
+  (let ((scene (clgl:create-scene)))
+    (with-primitives (scene prims)
+      ;; (dotimes (i 200)
+      ;;   (clgl:add-point prims
+      ;;                   (vec3-random -0.5f0 0.5f0)
+      ;;                   (vec 0.0f0 0.0f0 1.0f0 1.0f0)))
+      (dotimes (i 10)
+        (clgl:add-line prims
+                       (vec3-random -0.5f0 0.5f0)
+                       (vec3-random -0.5f0 0.5f0)
+                       (vec 0.0f0 1.0f0 0.0f0 1.0f0))
+        )
+      ;; (dotimes (i 2)
+      ;;   (clgl:add-triangle prims
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec 1.0f0 0.0f0 0.0f0 1.0f0)
+      ;;                      :filled nil))
+      ;; (dotimes (i 2)
+      ;;   (clgl:add-triangle prims
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec3-random -0.5f0 0.5f0)
+      ;;                      (vec 0.7f0 0.0f0 0.8f0 1.0f0)
+      ;;                      :filled t))
+      )
+    (view-scene scene background)
+    scene))

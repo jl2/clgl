@@ -15,13 +15,17 @@
 
 (defmethod cleanup ((obj shader-program))
   "Delete a shader on the GPU."
-  (with-slots (vert-shader frag-shader program) obj
-    (when (> 0 vert-shader)
-      (gl:delete-shader vert-shader))
-    (when (> 0 frag-shader)
-      (gl:delete-shader vert-shader))
-    (when (> 0 vert-shader)
-      (gl:delete-shader vert-shader))))
+  (with-slots (vertex-shader fragment-shader program) obj
+    (when (> 0 vertex-shader)
+      (gl:delete-shader vertex-shader))
+    (when (> 0 fragment-shader)
+      (gl:delete-shader vertex-shader))
+    (when (> 0 program)
+      (gl:delete-program program))
+
+    (setf vertex-shader 0)
+    (setf fragment-shader 0)
+    (setf program 0)))
 
 (defun compile-shader (type text)
   (let ((shader (gl:create-shader type)))
@@ -53,17 +57,17 @@
     (let* ((float-size   (cffi:foreign-type-size :float))
            (stride       (* (+ 3 3 4) float-size))
            (position-offset  (* 0 float-size))
-           (normal-offset  (* 3 float-size))
+           ;; (normal-offset  (* 3 float-size))
            (color-offset (* 6 float-size))
            (position-attrib (gl:get-attrib-location program "position"))
-           (normal-attrib (gl:get-attrib-location program "normal"))
+           ;; (normal-attrib (gl:get-attrib-location program "normal"))
            (color-attrib (gl:get-attrib-location program "color")))
       
       (gl:enable-vertex-attrib-array position-attrib)
-      (gl:enable-vertex-attrib-array normal-attrib)
+      ;;(gl:enable-vertex-attrib-array normal-attrib)
       (gl:enable-vertex-attrib-array color-attrib)
       (gl:vertex-attrib-pointer position-attrib 3 :float :false stride position-offset)
-      (gl:vertex-attrib-pointer normal-attrib 3 :float :false stride normal-offset)
+      ;;(gl:vertex-attrib-pointer normal-attrib 3 :float :false stride normal-offset)
       (gl:vertex-attrib-pointer color-attrib 4 :float :false stride color-offset)
 
       (gl:use-program program))))

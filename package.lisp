@@ -6,13 +6,18 @@
   (:use #:cl #:alexandria #:glfw #:3d-vectors #:3d-matrices)
   (:export
    #:description
-   #:show-scene
+   #:create-and-view
+   #:view-scene
    #:create-scene
    #:scene
+   #:cleanup
    #:viewport
    #:add-point-coords
    #:add-point
+   #:add-line
+   #:add-triangle
    #:point
    #:add-pt
-   #:force-redraw))
+   #:force-redraw
+   #:with-primitives))
 

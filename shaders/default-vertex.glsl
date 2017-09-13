@@ -1,7 +1,7 @@
 #version 330 core
 #extension GL_ARB_explicit_uniform_location : require
 
-layout(location = 0) in vec3 point;
+layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 color;
 
@@ -11,7 +11,9 @@ smooth out vec4 Color;
 
 void main()
 {
+    // vec4 L = normalize(vec4(position.xyz - vec3(0.0,0.0,10.0), 1.0));
+    // Color = color * max(0,dot(L, vec4(normal, 1.0) * inverse(projectionMatrix)));
     Color = color;
-    gl_PointSize = 2.0;
-    gl_Position = projectionMatrix * vec4(point, 1.0);
+    gl_PointSize = 1.0;
+    gl_Position = vec4(position, 1.0) * projectionMatrix;
 }
