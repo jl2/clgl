@@ -5,9 +5,7 @@
 (in-package #:clgl)
 
 (defclass opengl-object ()
-  ((visible :initarg :visible :initform t :type t)
-   (material-id :initarg :regular :initform 0 :type fixnum)
-   (vao :initform 0 :type fixnum)
+  ((vao :initform 0 :type fixnum)
    (vbos :initform nil :type (or null cons))
    (ebos :initform nil :type (or null cons))
    (shader-program :initform (make-instance 'shader-program
