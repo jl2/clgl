@@ -13,20 +13,31 @@
    (filled-triangles :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0)))
   (:documentation "A set of primitives that all use the same material."))
 
-(defconstant +data-stride+ 10)
+(defun point-ebo (ebos)
+  (car ebos))
 
+(defun line-ebo (ebos)
+  (cadr ebos))
+
+(defun triangle-ebo (ebos)
+  (caddr ebos))
+
+(defun filled-ebo (ebos)
+  (cadddr ebos))
+
+(defconstant +data-stride+ 10)
 (defun insert-point-in-buffer (buffer pt normal color)
   (let ((olen (length buffer)))
-    (vector-push-extend (coerce (vx pt) 'single-float) buffer +data-stride+)
-    (vector-push-extend (coerce (vy pt) 'single-float) buffer)
-    (vector-push-extend (coerce (vz pt) 'single-float) buffer)
-    (vector-push-extend (coerce (vx normal) 'single-float) buffer)
-    (vector-push-extend (coerce (vy normal) 'single-float) buffer)
-    (vector-push-extend (coerce (vz normal) 'single-float) buffer)
-    (vector-push-extend (coerce (red color) 'single-float) buffer)
-    (vector-push-extend (coerce (green color) 'single-float) buffer)
-    (vector-push-extend (coerce (blue color) 'single-float) buffer)
-    (vector-push-extend (coerce (alpha color) 'single-float) buffer)
+    (vector-push-extend (vx pt) buffer)
+    (vector-push-extend (vy pt) buffer)
+    (vector-push-extend (vz pt) buffer)
+    (vector-push-extend (vx normal) buffer)
+    (vector-push-extend (vy normal) buffer)
+    (vector-push-extend (vz normal) buffer)
+    (vector-push-extend (red color) buffer)
+    (vector-push-extend (green color) buffer)
+    (vector-push-extend (blue color) buffer)
+    (vector-push-extend (alpha color) buffer)
     (floor (/ olen +data-stride+))))
 
 (defun add-point (object pt color)
@@ -34,39 +45,81 @@
            (type point pt)
            (type color color))
   (with-slots (vertex-data points) object
-    (vector-push-extend (insert-point-in-buffer vertex-data pt (vec3 0.0f0 0.0f0 1.0f0) color) points)))
+    (vector-push-extend (insert-point-in-buffer vertex-data
+                                                pt
+                                                (vec3 1.0f0 1.0f0 1.0f0)
+                                                color)
+                        points)))
 
 (defun add-line (object pt1 pt2 color)
   (declare (type primitives object)
            (type point pt1 pt2)
            (type color color))
   (with-slots (vertex-data lines) object
-    (vector-push-extend (insert-point-in-buffer vertex-data pt1 (vec3 0.0f0 0.0f0 1.0f0) color) lines)
-    (vector-push-extend (insert-point-in-buffer vertex-data pt2 (vec3 0.0f0 0.0f0 1.0f0) color) lines)))
+    (vector-push-extend (insert-point-in-buffer vertex-data
+                                                pt1
+                                                (vec3 1.0f0 1.0f0 1.0f0)
+                                                color)
+                        lines)
+    (vector-push-extend (insert-point-in-buffer vertex-data
+                                                pt2
+                                                (vec3 1.0f0 1.0f0 1.0f0)
+                                                color)
+                        lines)))
 
 (defun triangle-normal (pt1 pt2 pt3)
   "Compute the normal of a triangle."
   (declare (type point pt1 pt2 pt3))
-  (vc (v- pt2 pt1) (v- pt2 pt3)))
+  (vc (v- pt1 pt2) (v- pt3 pt1)))
 
-(defun add-triangle (object pt1 pt2 pt3 color &key (filled nil) (normal nil) (norm1 nil) (norm2 nil) (norm3 nil))
+(defun add-triangle (object pt1 pt2 pt3 color)
+
   (declare (type primitives object)
            (type point pt1 pt2)
            (type color color))
-  (let* ((calculated (if normal normal (triangle-normal pt1 pt2 pt3)))
-         (n1 (if norm1 norm1 calculated))
-         (n2 (if norm2 norm2 calculated))
-         (n3 (if norm3 norm3 calculated)))
-    (cond (filled
-           (with-slots (vertex-data filled-triangles) object
-             (vector-push-extend (insert-point-in-buffer vertex-data pt1 n1 color) filled-triangles)
-             (vector-push-extend (insert-point-in-buffer vertex-data pt2 n2 color) filled-triangles)
-             (vector-push-extend (insert-point-in-buffer vertex-data pt3 n3 color) filled-triangles)))
-          (t
-           (with-slots (vertex-data triangles) object
-             (vector-push-extend (insert-point-in-buffer vertex-data pt1 n1 color) triangles)
-             (vector-push-extend (insert-point-in-buffer vertex-data pt2 n2 color) triangles)
-             (vector-push-extend (insert-point-in-buffer vertex-data pt3 n3 color) triangles))))))
+
+  (let ((normal (triangle-normal pt1 pt2 pt3)))
+    (with-slots (vertex-data triangles) object
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt1
+                                                  normal
+                                                  color)
+                          triangles)
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt2
+                                                  normal
+                                                  color)
+                          triangles)
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt3
+                                                  normal
+                                                  color)
+                          triangles))))
+
+(defun add-filled-triangle (object pt1 pt2 pt3 color)
+
+  (declare (type primitives object)
+           (type point pt1 pt2)
+           (type color color))
+
+  (let ((normal (triangle-normal pt1 pt2 pt3)))
+    (with-slots (vertex-data filled-triangles) object
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt1
+                                                  normal
+                                                  color)
+                          filled-triangles)
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt2
+                                                  normal
+                                                  color)
+                          filled-triangles)
+      (vector-push-extend (insert-point-in-buffer vertex-data
+                                                  pt3
+                                                  normal
+                                                  color)
+                          filled-triangles))))
+
 
 (defmethod fill-buffers ((object primitives))
   (call-next-method)
@@ -75,28 +128,42 @@
       (setf vbos (gl:gen-buffers 1))
       (setf ebos (gl:gen-buffers 4)))
     (let ((gl-vertices (to-gl-float-array vertex-data)))
-      
       (gl:bind-buffer :array-buffer (car vbos))
       (gl:buffer-data :array-buffer :static-draw gl-vertices)
       (gl:free-gl-array gl-vertices)
       (loop for indices in (list points lines triangles filled-triangles)
          for ebo in ebos
          do
-           (when (> (length indices) 0)
-             (let ((gl-indices (to-gl-array indices :unsigned-int)))
-               ;; (format t "Filling VBO and EBO:~a with indices ~a~%" ebo indices)
-               (gl:bind-buffer :element-array-buffer ebo)
-               (gl:buffer-data :element-array-buffer :static-draw gl-indices)
-               (gl:free-gl-array gl-indices)))))))
+           (let ((gl-indices (to-gl-array indices :unsigned-int)))
+             (format t "Filling VBO and EBO:~a with indices ~a~%" ebo indices)
+             (gl:bind-buffer :element-array-buffer ebo)
+             (gl:buffer-data :element-array-buffer :static-draw gl-indices)
+             (gl:free-gl-array gl-indices))))))
   
 (defmethod render-buffers ((object primitives) viewport)
   (call-next-method)
   (with-slots (ebos points lines triangles filled-triangles) object
-    (loop for ebo in ebos
-       for count in (list (length points) (length lines) (length triangles) (length filled-triangles))
-       for type in '(:points :lines :triangles :triangles)
-       for filled in '(:line :line :line :fill)
-       do
-         ;; (format t "rendering ~a ~a ~a ~a~%" ebo count type filled)
-         (gl:polygon-mode :front-and-back filled)
-         (%gl:draw-elements type count  :unsigned-int ebo))))
+
+    (gl:polygon-mode :front-and-back :line)
+    (when (> (length points) 0)
+      (gl:bind-buffer :element-array-buffer (point-ebo ebos))
+      (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
+
+    (when (> (length lines) 0)
+      (gl:bind-buffer :element-array-buffer (line-ebo ebos))
+      (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
+
+    (when (> (length triangles) 0)
+      (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
+      (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length triangles)))
+
+    (when (> (length filled-triangles) 0)
+      (gl:polygon-mode :front-and-back :fill)
+      (gl:bind-buffer :element-array-buffer (filled-ebo ebos))
+      (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles)))
+
+    ;; (gl:draw-elements :triangles (to-gl-array triangles :unsigned-int))
+    ;; (gl:polygon-mode :front-and-back :fill)
+    ;; (gl:draw-elements :triangles (to-gl-array filled-triangles :unsigned-int))
+    ))
+    

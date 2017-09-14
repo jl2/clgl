@@ -3,17 +3,18 @@
 ;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah.larocco@gmail.com>
 
 (in-package #:clgl)
-(declaim (optimize (speed 0) (debug 3) (safety 3)))
+
 (defclass opengl-object ()
-  ((color :initarg :color :initform nil :type '(or null color))
+  ((color :initarg :color :initform nil :type (or null color))
    (visible :initarg :visible :initform t :type t)
    (material-id :initarg :regular :initform 0 :type fixnum)
    (vao :initform 0 :type fixnum)
-   (vbos :initform nil :type cons)
-   (ebos :initform nil :type cons)
+   (vbos :initform nil :type (or null cons))
+   (ebos :initform nil :type (or null cons))
    (shader-program :initform (make-instance 'shader-program
                                             :vertex (read-file (merge-pathnames *shader-dir* "default-vertex.glsl"))
-                                            :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))))
+                                            :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl"))))
+   (transformation :initform (meye 4) :type mat4))
   (:documentation "Base class for all objects that can be rendered in a scene."))
 
 (defgeneric fill-buffers (object))
@@ -30,9 +31,9 @@
 
 (defmethod fill-buffers :after ((object opengl-object))
   (with-slots (shader-program) object
-    (use-program shader-program)
-    (format t "Unbinding vertex array...~%")
-    (gl:bind-vertex-array 0)))
+    (use-program shader-program))
+  (format t "Unbinding vertex array...~%")
+  (gl:bind-vertex-array 0))
 
 (defmethod cleanup ((object opengl-object))
   (declare (ignorable object))
@@ -47,19 +48,20 @@
     (setf vbos nil)))
 
 (defmethod render-buffers ((object opengl-object) viewport)
-  (with-slots (vao shader-program) object
+  (with-slots (vao transformation shader-program) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao)
-      (let ((matrix (vector (get-transform-matrix viewport))))
-        (with-slots (program) shader-program
-          (gl:uniform-matrix
-           (gl:get-uniform-location program "projectionMatrix")
-	       4
-           matrix
-           ))))))
+      (with-slots (program) shader-program
+        (let ((location (gl:get-uniform-location program "projectionMatrix")))
+          (gl:uniform-matrix location
+                             4
+                             (vector (marr4 (get-transform
+                                             viewport
+                                             (meye 4))))
+                             nil))))))
 
-
-
+(defmethod render-buffers :after ((object opengl-object) viewport)
+  (gl:bind-vertex-array 0))
 
 (defun to-gl-float-array (arr)
   "Create an OpenGL float array from a CL array of numbers.

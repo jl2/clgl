@@ -31,26 +31,23 @@
                            :element-type (stream-element-type ins))))
       (read-sequence seq ins) seq)))
 
-(defgeneric get-transform-matrix (view))
+(defgeneric get-transform (view object-transform))
+(defmethod get-transform ((view t) object-transform)
+  object-transform)
 
 (defclass spherical-viewport ()
   ((radius :initarg :radius :initform 10.0f0)
    (theta :initarg :theta :initform 0.0f0)
    (phi :initarg :phi :initform (/ pi 4))))
 
-(defmethod get-transform-matrix ((view spherical-viewport))
-  (marr4 (meye 4)))
-
 (defclass look-at-viewport ()
-  ((eye :initarg :eye :initform (vec3 0.0f0 0.0f0 10.0f0))
+  ((eye :initarg :eye :initform (vec3 5.0f0 5.0f0 10.0f0))
    (center :initarg :center :initform (vec3 0.0f0 0.0f0 0.0f0))
    (up :initarg :up :initform +vy+)))
 
-(defmethod get-transform-matrix ((view look-at-viewport))
+(defmethod get-transform ((view look-at-viewport) object-transform)
   (with-slots (eye center up) view
-    (let ((result (marr4 (minv (nmlookat (m* 0.125 (meye 4)) eye center up)))))
-      ;;(format t "~a~%" result)
-      result)))
+    (nmlookat object-transform eye center up)))
 
 (defclass scene ()
   ((viewport :initarg :viewport :initform (make-instance 'look-at-viewport))
@@ -105,11 +102,11 @@
   (with-init
     (let* ((monitor (glfw:get-primary-monitor))
            (cur-mode (glfw:get-video-mode monitor))
-           (cur-width (coerce (getf cur-mode '%cl-glfw3:width) 'single-float))
+           (cur-width (getf cur-mode '%cl-glfw3:width))
            (cur-height (getf cur-mode '%cl-glfw3:height)))
       (with-window (:title "OpenGL Scene Viewer"
                            :width (floor (/ cur-width 2.0f0))
-                           :height cur-height
+                           :height (floor (/ cur-height 2.0f0))
                            :decorated nil
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile
@@ -141,30 +138,26 @@
 (defun create-and-view (&optional (background nil))
   (let ((scene (clgl:create-scene)))
     (with-primitives (scene prims)
-      ;; (dotimes (i 200)
-      ;;   (clgl:add-point prims
-      ;;                   (vec3-random -0.5f0 0.5f0)
-      ;;                   (vec 0.0f0 0.0f0 1.0f0 1.0f0)))
-      (dotimes (i 10)
-        (clgl:add-line prims
+      (dotimes (i 200)
+        (add-point prims
+                        (vec3-random -0.5f0 0.5f0)
+                        (vec 0.0f0 0.0f0 1.0f0 1.0f0)))
+      (dotimes (i 20)
+        (add-line prims
                        (vec3-random -0.5f0 0.5f0)
                        (vec3-random -0.5f0 0.5f0)
-                       (vec 0.0f0 1.0f0 0.0f0 1.0f0))
-        )
-      ;; (dotimes (i 2)
-      ;;   (clgl:add-triangle prims
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec 1.0f0 0.0f0 0.0f0 1.0f0)
-      ;;                      :filled nil))
-      ;; (dotimes (i 2)
-      ;;   (clgl:add-triangle prims
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec3-random -0.5f0 0.5f0)
-      ;;                      (vec 0.7f0 0.0f0 0.8f0 1.0f0)
-      ;;                      :filled t))
-      )
+                       (vec 0.0f0 1.0f0 0.0f0 1.0f0)))
+      (dotimes (i 20)
+        (add-triangle prims
+                           (vec3-random -0.5f0 0.5f0)
+                           (vec3-random -0.5f0 0.5f0)
+                           (vec3-random -0.5f0 0.5f0)
+                           (vec 1.0f0 0.0f0 0.0f0 1.0f0)))
+      (dotimes (i 20)
+        (add-filled-triangle prims
+                           (vec3 (/ i 20.0) 0.0f0 0.0f0)
+                           (vec3 (/ i 20.0) 0.25f0 0.0f0)
+                           (vec3 (/ (+ i 1) 20.0) 0.0f0 0.0f0)
+                           (vec 0.8f0 1.0f0 0.8f0 1.0f0))))
     (view-scene scene background)
     scene))
