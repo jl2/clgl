@@ -5,8 +5,7 @@
 (in-package #:clgl)
 
 (defclass opengl-object ()
-  ((color :initarg :color :initform nil :type (or null color))
-   (visible :initarg :visible :initform t :type t)
+  ((visible :initarg :visible :initform t :type t)
    (material-id :initarg :regular :initform 0 :type fixnum)
    (vao :initform 0 :type fixnum)
    (vbos :initform nil :type (or null cons))
@@ -18,7 +17,7 @@
   (:documentation "Base class for all objects that can be rendered in a scene."))
 
 (defgeneric fill-buffers (object))
-(defgeneric render-buffers (object viewport))
+(defgeneric render (object viewport))
 
 (defmethod fill-buffers ((object opengl-object))
   (with-slots (vao shader-program) object
@@ -47,7 +46,7 @@
     (setf vao 0)
     (setf vbos nil)))
 
-(defmethod render-buffers ((object opengl-object) viewport)
+(defmethod render ((object opengl-object) viewport)
   (with-slots (vao transformation shader-program) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao)
@@ -60,7 +59,7 @@
                                              (meye 4))))
                              nil))))))
 
-(defmethod render-buffers :after ((object opengl-object) viewport)
+(defmethod render :after ((object opengl-object) viewport)
   (gl:bind-vertex-array 0))
 
 (defun to-gl-float-array (arr)

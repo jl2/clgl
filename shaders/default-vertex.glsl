@@ -14,6 +14,6 @@ void main()
     vec4 L = normalize(vec4(position.xyz - vec3(10.0,10.0,10.0), 1.0));
     Color = vec4(0.0125, 0.0125, 0.0125, 0.0125) + color * max(0.2, dot(L, vec4(normal, 1.0) * inverse(projectionMatrix)));
     // Color = color;
-    gl_PointSize = 1.0;
+    gl_PointSize = 0.5;
     gl_Position = vec4(position, 1.0) * projectionMatrix;
 }

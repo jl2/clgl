@@ -6,7 +6,6 @@
 
 (defclass primitives (opengl-object)
   ((vertex-data :initform (make-array 0 :element-type 'single-float :initial-contents '() :adjustable t :fill-pointer 0))
-   (counts :initform nil)
    (points :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
    (lines :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
    (triangles :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
@@ -140,7 +139,7 @@
              (gl:buffer-data :element-array-buffer :static-draw gl-indices)
              (gl:free-gl-array gl-indices))))))
   
-(defmethod render-buffers ((object primitives) viewport)
+(defmethod render ((object primitives) viewport)
   (call-next-method)
   (with-slots (ebos points lines triangles filled-triangles) object
 
@@ -161,9 +160,5 @@
       (gl:polygon-mode :front-and-back :fill)
       (gl:bind-buffer :element-array-buffer (filled-ebo ebos))
       (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles)))
-
-    ;; (gl:draw-elements :triangles (to-gl-array triangles :unsigned-int))
-    ;; (gl:polygon-mode :front-and-back :fill)
-    ;; (gl:draw-elements :triangles (to-gl-array filled-triangles :unsigned-int))
     ))
     

@@ -18,5 +18,8 @@
                (:file "clgl")
                (:file "opengl-object")
                (:file "primitives")
-               (:file "shaders")))
+               (:file "shaders")
+               (:file "viewer")
+               (:file "viewport")
+               (:file "utilities")))
 

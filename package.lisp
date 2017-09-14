@@ -5,19 +5,19 @@
 (defpackage #:clgl
   (:use #:cl #:alexandria #:glfw #:3d-vectors #:3d-matrices)
   (:export
-   #:description
-   #:create-and-view
-   #:view-scene
-   #:create-scene
-   #:scene
-   #:cleanup
    #:viewport
-   #:add-point-coords
-   #:add-point
-   #:add-line
-   #:add-triangle
-   #:point
-   #:add-pt
+   #:spherical-viewport
+   #:look-at-viewport
+
+   #:viewer
+   #:show-viewer
+   #:close-viewer
+   #:add-object
+   #:rm-object
    #:force-redraw
-   #:with-primitives))
+   #:clear
+
+   #:primitives
+
+   #:random-primitives))
 
