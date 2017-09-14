@@ -17,6 +17,6 @@
   :components ((:file "package")
                (:file "clgl")
                (:file "opengl-object")
-               (:file "primitive-container")
+               (:file "primitives")
                (:file "shaders")))
 

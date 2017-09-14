@@ -54,7 +54,7 @@
 
 (defclass scene ()
   ((viewport :initarg :viewport :initform (make-instance 'look-at-viewport))
-   (objects :initarg :objects :initform (list (make-instance 'primitive-container)))
+   (objects :initarg :objects :initform (list (make-instance 'primitives)))
    (modified :initform t)
    (lock :initform (bt:make-lock "scene-lock")))
   (:documentation ""))

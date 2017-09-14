@@ -1,10 +1,10 @@
-;;;; primitive-container.lisp
+;;;; primitives.lisp
 ;;;;
 ;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah.larocco@gmail.com>
 
 (in-package #:clgl)
 
-(defclass primitive-container (opengl-object)
+(defclass primitives (opengl-object)
   ((vertex-data :initform (make-array 0 :element-type 'single-float :initial-contents '() :adjustable t :fill-pointer 0))
    (counts :initform nil)
    (points :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
@@ -30,14 +30,14 @@
     (floor (/ olen +data-stride+))))
 
 (defun add-point (object pt color)
-  (declare (type primitive-container object)
+  (declare (type primitives object)
            (type point pt)
            (type color color))
   (with-slots (vertex-data points) object
     (vector-push-extend (insert-point-in-buffer vertex-data pt (vec3 0.0f0 0.0f0 1.0f0) color) points)))
 
 (defun add-line (object pt1 pt2 color)
-  (declare (type primitive-container object)
+  (declare (type primitives object)
            (type point pt1 pt2)
            (type color color))
   (with-slots (vertex-data lines) object
@@ -50,7 +50,7 @@
   (vc (v- pt2 pt1) (v- pt2 pt3)))
 
 (defun add-triangle (object pt1 pt2 pt3 color &key (filled nil) (normal nil) (norm1 nil) (norm2 nil) (norm3 nil))
-  (declare (type primitive-container object)
+  (declare (type primitives object)
            (type point pt1 pt2)
            (type color color))
   (let* ((calculated (if normal normal (triangle-normal pt1 pt2 pt3)))
@@ -68,7 +68,7 @@
              (vector-push-extend (insert-point-in-buffer vertex-data pt2 n2 color) triangles)
              (vector-push-extend (insert-point-in-buffer vertex-data pt3 n3 color) triangles))))))
 
-(defmethod fill-buffers ((object primitive-container))
+(defmethod fill-buffers ((object primitives))
   (call-next-method)
   (with-slots (vao vbos ebos points lines triangles filled-triangles vertex-data) object
     (when (null vbos)
@@ -89,7 +89,7 @@
                (gl:buffer-data :element-array-buffer :static-draw gl-indices)
                (gl:free-gl-array gl-indices)))))))
   
-(defmethod render-buffers ((object primitive-container) viewport)
+(defmethod render-buffers ((object primitives) viewport)
   (call-next-method)
   (with-slots (ebos points lines triangles filled-triangles) object
     (loop for ebo in ebos
