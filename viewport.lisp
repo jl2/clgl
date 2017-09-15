@@ -14,10 +14,10 @@
    (phi :initarg :phi :initform (/ pi 4))))
 
 (defclass look-at-viewport ()
-  ((eye :initarg :eye :initform (vec3 16.0f0 16.0f0 16.0f0))
+  ((eye :initarg :eye :initform (vec3 8.0f0 16.0f0 8.0f0))
    (center :initarg :center :initform (vec3 0.0f0 0.0f0 0.0f0))
    (up :initarg :up :initform +vy+)))
 
 (defmethod get-transform ((view look-at-viewport) object-transform)
   (with-slots (eye center up) view
-    (nmlookat object-transform eye center up)))
+    (m* object-transform (mlookat eye center up))))

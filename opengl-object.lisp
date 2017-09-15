@@ -54,7 +54,7 @@
                              4
                              (vector (marr4 (get-transform
                                              viewport
-                                             (meye 4))))
+                                             transformation)))
                              nil))))))
 
 (defmethod render :after ((object opengl-object) viewport)

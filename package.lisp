@@ -15,9 +15,19 @@
    #:add-object
    #:rm-object
    #:force-redraw
+   #:set-viewport
    #:clear
+   #:scale-object
+   #:translate-object
+   #:rotate-object
 
    #:primitives
+   #:add-point
+   #:add-line
+   #:add-triangle
+   #:add-filled-triangle
+   #:make-3d-axis
 
+   #:make-line-pattern
    #:random-primitives))
 

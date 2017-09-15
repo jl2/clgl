@@ -96,6 +96,12 @@
       (trivial-main-thread:with-body-in-main-thread ()
         (viewer-thread-function viewer))))
 
+(defun set-viewport (viewer new-viewport)
+  (with-viewer-lock (viewer)
+    (with-slots (viewport modified) viewer
+      (setf viewport new-viewport)
+      (setf modified t))))
+
 (defun close-viewer (viewer)
   (with-viewer-lock (viewer)
     (with-slots (window-open should-close) viewer
@@ -109,6 +115,27 @@
         (setf (cdr item) object)
         (push (cons name object) objects))
       (setf modified t))))
+
+(defun scale-object (viewer object-name scale)
+  (with-viewer-lock (viewer)
+    (with-slots (objects modified) viewer
+      (when-let ((items (assoc object-name objects)))
+        (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))
+        (setf modified t)))))
+
+(defun translate-object (viewer object-name offset)
+  (with-viewer-lock (viewer)
+    (with-slots (objects modified) viewer
+      (when-let ((items (assoc object-name objects)))
+        (nmtranslate (slot-value (cdr items) 'transformation) offset)
+        (setf modified t)))))
+
+(defun rotate-object (viewer object-name vector angle)
+  (with-viewer-lock (viewer)
+    (with-slots (objects modified) viewer
+      (when-let ((items (assoc object-name objects)))
+        (nmrotate (slot-value (cdr items) 'transformation) vector angle)
+        (setf modified t)))))
 
 (defun rm-object (viewer name)
   (with-viewer-lock (viewer)
@@ -129,6 +156,3 @@
       (setf objects nil)
       (setf modified t))))
 
-(defun set-viewport (viewer viewport)
-  (with-viewer-lock (viewer)
-    (setf (slot-value viewer 'viewport) viewport)))
