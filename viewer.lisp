@@ -83,12 +83,12 @@
                (check-for-state-changes viewer)
                (render viewer nil))
            do (swap-buffers)
-           do (poll-events)))
-
-      (with-viewer-lock (viewer)
-        (with-slots (objects) viewer
-          (dolist (object objects)
-            (cleanup object)))))))
+           do (poll-events))
+        (with-viewer-lock (viewer)
+          (with-slots (objects) viewer
+            (dolist (object objects)
+              (cleanup (cdr object))))))
+      )))
 
 (defun show-viewer (viewer &optional (in-thread nil))
   (if in-thread
@@ -121,21 +121,24 @@
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))
-        (setf modified t)))))
+        ;; (setf modified t)
+        ))))
 
 (defun translate-object (viewer object-name offset)
   (with-viewer-lock (viewer)
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmtranslate (slot-value (cdr items) 'transformation) offset)
-        (setf modified t)))))
+        ;; (setf modified t)
+        ))))
 
 (defun rotate-object (viewer object-name vector angle)
   (with-viewer-lock (viewer)
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmrotate (slot-value (cdr items) 'transformation) vector angle)
-        (setf modified t)))))
+        ;; (setf modified t)
+        ))))
 
 (defun rm-object (viewer name)
   (with-viewer-lock (viewer)

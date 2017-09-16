@@ -14,5 +14,5 @@ void main()
     Color = vec4(0.0125, 0.0125, 0.0125, 0.0125) + color * max(0.2, dot(L, vec4(normal, 1.0) * inverse(projectionMatrix)));
     // Color = color;
     gl_PointSize = 0.5;
-    gl_Position = vec4(position, 1.0) * projectionMatrix;
+    gl_Position = projectionMatrix * vec4(position, 1.0);
 }

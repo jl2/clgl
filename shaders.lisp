@@ -7,7 +7,8 @@
 (defparameter *shader-dir* "~/src/lisp/clgl/shaders/")
 
 (defclass shader-program ()
-  ((vertex-text :initarg :vertex :initform (read-file (merge-pathnames *shader-dir* "default-vertex.glsl")))
+  ((layout :initarg :inputs :initform '( ("position" . 3) ("color" . 4)))
+   (vertex-text :initarg :vertex :initform (read-file (merge-pathnames *shader-dir* "default-line-vertex.glsl")))
    (fragment-text :initarg :fragment :initform (read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))
    (vertex-shader :initform 0)
    (fragment-shader :initform 0)
@@ -52,22 +53,20 @@
       (let ((status (gl:get-program program :validate-status)))
         (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program)))))
 
-(defun use-program (program)
-  (with-slots (program) program
-    (let* ((float-size   (cffi:foreign-type-size :float))
-           (stride       (* (+ 3 3 4) float-size))
-           (position-offset  (* 0 float-size))
-           (normal-offset  (* 3 float-size))
-           (color-offset (* 6 float-size))
-           (position-attrib (gl:get-attrib-location program "position"))
-           (normal-attrib (gl:get-attrib-location program "normal"))
-           (color-attrib (gl:get-attrib-location program "color")))
-      
-      (gl:enable-vertex-attrib-array position-attrib)
-      (gl:enable-vertex-attrib-array normal-attrib)
-      (gl:enable-vertex-attrib-array color-attrib)
-      (gl:vertex-attrib-pointer position-attrib 3 :float :false stride position-offset)
-      (gl:vertex-attrib-pointer normal-attrib 3 :float :false stride normal-offset)
-      (gl:vertex-attrib-pointer color-attrib 4 :float :false stride color-offset)
 
-      (gl:use-program program))))
+(defun use-program (program)
+  (with-slots (layout program) program
+    (let* ((float-size   (cffi:foreign-type-size :float))
+           (stride       (* (apply #'+ (mapcar #'cdr layout)) float-size)))
+
+      (loop for entry in layout
+         for count from 0
+         do
+           (let* ((attrib-name (car entry))
+                  (attrib-size (cdr entry))
+                  (position-offset  (* count float-size))
+                  (position-attrib (gl:get-attrib-location program attrib-name)))
+             ;; (format t "~a ~a ~a ~a~%" attrib-name attrib-size position-offset position-attrib)
+             (gl:enable-vertex-attrib-array position-attrib)
+             (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride position-offset))))
+    (gl:use-program program)))

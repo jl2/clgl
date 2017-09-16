@@ -6,9 +6,13 @@
   (:use #:cl #:alexandria #:glfw #:3d-vectors #:3d-matrices)
   (:export
    #:viewport
+   #:orthographic
+   #:perspective
+   #:get-transform
+   #:apply-view-transformation
+   #:2d-viewport
    #:spherical-viewport
    #:look-at-viewport
-   #:2d-viewport
 
    #:viewer
    #:show-viewer
@@ -32,6 +36,11 @@
    #:axis-viewer
    #:make-line-pattern
    #:random-primitives
+
+   #:2d-plot
+   #:xy-square
+   #:xz-square
+   #:yz-square
 
    #:simple-animation))
 
