@@ -8,6 +8,7 @@
    #:viewport
    #:spherical-viewport
    #:look-at-viewport
+   #:2d-viewport
 
    #:viewer
    #:show-viewer
@@ -27,8 +28,10 @@
    #:add-triangle
    #:add-filled-triangle
    #:make-3d-axis
-   #:axis-viewer
 
+   #:axis-viewer
    #:make-line-pattern
-   #:random-primitives))
+   #:random-primitives
+
+   #:simple-animation))
 

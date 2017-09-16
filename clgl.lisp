@@ -29,7 +29,11 @@
     prims))
 
 
-(defun make-3d-axis (&optional (increment (vec3 1 1 1)) (min (vec3 -1 -1 -1)) (max (vec3 1 1 1)) (color (vec4 1.0 1.0 1.0 0.8)))
+(defun make-3d-axis (&optional
+                       (increment (vec3 1 1 1))
+                       (min (vec3 -1 -1 -1))
+                       (max (vec3 1 1 1))
+                       (color (vec4 1.0 1.0 1.0 0.8)))
   (declare (ignorable increment min max color))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ min) (vx__ max) color)
@@ -90,3 +94,8 @@
     (add-object viewer 'axis (make-3d-axis))
     (show-viewer viewer)
     viewer))
+
+(defmacro simple-animation ((variable steps) &body body)
+  `(dotimes (,variable ,steps)
+     ,@body
+     (sleep (/ 1.0 30.0))))

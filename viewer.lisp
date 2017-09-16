@@ -100,7 +100,7 @@
   (with-viewer-lock (viewer)
     (with-slots (viewport modified) viewer
       (setf viewport new-viewport)
-      (setf modified t))))
+      )))
 
 (defun close-viewer (viewer)
   (with-viewer-lock (viewer)

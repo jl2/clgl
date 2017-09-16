@@ -8,6 +8,16 @@
 (defmethod get-transform ((view t) object-transform)
   object-transform)
 
+(defclass 2d-viewport ()
+  ((radius :initarg :radius :initform 10.0)))
+
+(defmethod get-transform ((view 2d-viewport) object-transform)
+  (with-slots (radius) view
+    (m* (mscaling (vec3 (/ 1.0 radius)
+                        (/ 1.0 radius)
+                        (/ 1.0 radius)))
+        object-transform)))
+
 (defclass spherical-viewport ()
   ((radius :initarg :radius :initform 10.0f0)
    (theta :initarg :theta :initform 0.0f0)
@@ -15,7 +25,11 @@
 
 (defmethod get-transform ((view spherical-viewport) object-transform)
   (with-slots (radius theta phi) view
-    (m* (nmtranslate object-transform (vec 0 0 (- radius)) ) (m* (mrotation (vec 1 0 0) theta) (mrotation (vec 0 1 0) phi)))))
+    (nmtranslate (m* 
+                     object-transform 
+                     (m* (mrotation (vec 0 1 0) theta)
+                         (mrotation (vec 0 0 1) phi)))
+                 (vec 0 0 (- (* 1 radius))  ))))
 
 
 (defclass look-at-viewport ()
