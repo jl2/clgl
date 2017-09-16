@@ -59,13 +59,13 @@
       (with-window (:title "OpenGL Scene Viewer"
                            :width (floor (/ cur-width 2.0f0))
                            :height (floor (/ cur-height 2.0f0))
-                           :decorated nil
+                           :decorated t
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile
                            :context-version-major 3
                            :context-version-minor 3
                            :opengl-forward-compat t
-                           :resizable nil)
+                           :resizable t)
 
         (setf %gl:*gl-get-proc-address* #'get-proc-address)
         (set-key-callback 'quit-on-escape)
@@ -148,7 +148,7 @@
 (defun force-redraw (viewer)
   (with-viewer-lock (viewer)
     (setf (slot-value viewer 'clgl::modified) t)))
-  
+
 (defun clear (viewer)
   (with-viewer-lock (viewer)
     (with-slots (objects to-cleanup modified) viewer

@@ -4,7 +4,7 @@
 
 (in-package #:clgl)
 
-(defparameter *shader-dir* "/home/jeremiah/src/lisp/clgl/shaders/")
+(defparameter *shader-dir* "~/src/lisp/clgl/shaders/")
 
 (defclass shader-program ()
   ((vertex-text :initarg :vertex :initform (read-file (merge-pathnames *shader-dir* "default-vertex.glsl")))

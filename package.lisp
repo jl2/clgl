@@ -27,6 +27,7 @@
    #:add-triangle
    #:add-filled-triangle
    #:make-3d-axis
+   #:axis-viewer
 
    #:make-line-pattern
    #:random-primitives))
