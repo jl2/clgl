@@ -29,11 +29,6 @@
 
 (defmethod get-transform ((view perspective))
   (with-slots (fovy aspect near far) view
-    ;; (let* ((mat (mperspective fovy aspect near far))
-    ;;        (tmp (aref (marr4 mat) 11)))
-    ;;   (setf (aref (marr4 mat) 11) (aref (marr4 mat) 14))
-    ;;   (setf (aref (marr4 mat) 14) tmp)
-    ;;   mat)
     (mperspective fovy aspect near far)
     ))
 
@@ -75,11 +70,13 @@
    (up :initarg :up :initform +vz+)))
 
 (defmethod get-transform ((view look-at-viewport))
-  (with-slots (eye center up) view
-    (let ((vlen  (vlength (v- eye center)))
+  (with-slots (eye center up) view 
+   (let ((vlen  (vlength (v- eye center)))
           (mat (mlookat eye center up)))
       (m* mat 
-          (mscaling (vec3 (/ 1.0f0 vlen) (/ 1.0f0 vlen) (/ 1.0f0 vlen)))))))
+          (mscaling (vec3 (/ 1.0f0 vlen)
+                          (/ 1.0f0 vlen)
+                          (/ 1.0f0 vlen)))))))
 
 
 (defun apply-view-transformation (viewport object-transform)

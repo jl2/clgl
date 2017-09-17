@@ -89,12 +89,13 @@
     prims))
 
 
-(defun axis-viewer (&optional in-thread)
+(defun axis-viewer (&key (name 'object) (object nil) (show t) (in-thread nil))
   (let ((viewer (make-instance 'viewer)))
     (add-object viewer 'axis (make-3d-axis))
-    (add-object viewer 'xysquare (clgl:xy-square))
-    (add-object viewer 'yzsquare (clgl:yz-square))
-    (show-viewer viewer in-thread)
+    (when object
+      (add-object viewer name object ))
+    (when show
+      (show-viewer viewer in-thread))
     viewer))
 
 (defun 2d-plot (&key
@@ -147,3 +148,69 @@
     (add-line square (vec3 0 1 1) (vec3 0 0 1) (vec4 0 0 1 1))
     (add-line square (vec3 0 0 1) (vec3 0 0 0) (vec4 1 0 1 1))
     square))
+
+(defun sphere-x (uv vv)
+  (declare (ignorable uv vv))
+  (* (cos uv) (sin uv)))
+
+(defun sphere-y (uv vv)
+  (declare (ignorable uv vv))
+  (* (cos uv) (cos uv)))
+
+(defun sphere-z (uv vv)
+  (declare (ignorable uv vv))
+  (sin uv))
+
+(defun plane-x (uv vv)
+  (declare (ignorable uv vv))
+  uv)
+
+(defun plane-y (uv vv)
+  (declare (ignorable uv vv))
+  vv)
+
+(defun plane-z (uv vv)
+  (declare (ignorable uv vv))
+  0.0)
+
+
+(defun add-quad (obj color xf yf zf uv vv nu nv filled)
+  (let ((tri-function (if filled #'add-filled-triangle #'add-triangle)))
+    (funcall tri-function obj
+             (vec3 (funcall xf uv nv)
+                   (funcall yf uv nv)
+                   (funcall zf uv nv))
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
+             (vec3 (funcall xf uv vv)
+                   (funcall yf uv vv)
+                   (funcall zf uv vv))
+             color)
+
+    (funcall tri-function obj
+             (vec3 (funcall xf nu nv)
+                   (funcall yf nu nv)
+                   (funcall zf nu nv))
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
+             (vec3 (funcall xf uv nv)
+                   (funcall yf uv nv)
+                   (funcall zf uv nv))
+             color)))
+
+(defun make-parametric (&key (xf #'sphere-x) (yf #'sphere-y) (zf #'sphere-z) (u-steps 20) (v-steps 20) (filled nil)
+                          (u-min 0.0) (u-max pi) (v-min 0.0) (v-max (* 2 pi))
+                          (color (vec4 0 1 0 1)))
+  (let ((object (make-instance 'clgl:primitives))
+        (du (/ (- u-max u-min) u-steps))
+        (dv (/ (- v-max v-min) v-steps)))
+    (dotimes (i u-steps)
+      (dotimes (j v-steps)
+        (let ((uv (+ u-min (* i du)))
+              (vv (+ v-min (* j dv)))
+              (nu (+ u-min (* (1+ i) du)))
+              (nv (+ v-min (* (1+ j) dv))))
+          (add-quad object color xf yf zf uv vv nu nv filled))))
+    object))

@@ -42,5 +42,12 @@
    #:xz-square
    #:yz-square
 
+   #:make-parametric
+   #:sphere-x
+   #:sphere-y
+   #:sphere-z
+   #:plane-x
+   #:plane-y
+   #:plane-z
    #:simple-animation))
 

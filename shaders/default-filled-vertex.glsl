@@ -10,9 +10,9 @@ smooth out vec4 Color;
 
 void main()
 {
-    vec4 L = normalize(vec4(position.xyz - vec3(10.0,10.0,10.0), 1.0));
-    Color = vec4(0.0125, 0.0125, 0.0125, 0.0125) + color * max(0.2, dot(L, vec4(normal, 1.0) * inverse(projectionMatrix)));
+    vec4 L = normalize(vec4(vec3(10.0,10.0,10.0) - position.xyz, 1.0));
+    Color = vec4(0.0125, 0.0125, 0.0125, 0.0125) + color * max(0.2, dot(L, inverse(projectionMatrix) * vec4(normal, 1.0)));
     // Color = color;
-    gl_PointSize = 0.5;
+    gl_PointSize = 1.0;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 }

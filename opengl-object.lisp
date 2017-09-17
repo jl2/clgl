@@ -40,8 +40,7 @@
       (format t "Allocated vao: ~a~%" vao))
     (format t "Binding vao ~a~%" vao)
     (gl:bind-vertex-array vao)
-    (mapcar #'build-program shader-programs)
-))
+    (mapcar #'build-program shader-programs)))
 
 (defmethod fill-buffers :after ((object opengl-object))
   (format t "Unbinding vertex array...~%")

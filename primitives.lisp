@@ -85,19 +85,24 @@
   (declare (type primitives object)
            (type point pt1 pt2)
            (type color color))
-  (with-slots (filled-vertex-data triangles) object
-    (vector-push-extend (insert-pc-in-buffer filled-vertex-data
-                                             pt1
-                                             color)
-                        triangles)
-    (vector-push-extend (insert-pc-in-buffer filled-vertex-data
-                                             pt2
-                                             color)
-                        triangles)
-    (vector-push-extend (insert-pc-in-buffer filled-vertex-data
-                                             pt3
-                                             color)
-                        triangles)))
+  (let ((normal (triangle-normal pt1 pt2 pt3)))
+
+    (with-slots (filled-vertex-data triangles) object
+      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+                                                pt1
+                                                normal
+                                                color)
+                          triangles)
+      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+                                                pt2
+                                                normal
+                                                color)
+                          triangles)
+      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+                                                pt3
+                                                normal
+                                                color)
+                          triangles))))
 
 (defun add-filled-triangle (object pt1 pt2 pt3 color)
 
@@ -139,16 +144,24 @@
       (gl:buffer-data :array-buffer :static-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
 
+    (loop for indices in (list points lines)
+       for ebo in ebos
+       do
+         (let ((gl-indices (to-gl-array indices :unsigned-int)))
+           (format t "Filling ebo ~a of vbo ~a with indices ~a~%" ebo (car vbos) indices)
+           (gl:bind-buffer :element-array-buffer ebo)
+           (gl:buffer-data :element-array-buffer :static-draw gl-indices)
+           (gl:free-gl-array gl-indices)))
+
     (let ((gl-vertices (to-gl-float-array filled-vertex-data)))
       (gl:bind-buffer :array-buffer (cadr vbos))
       (gl:buffer-data :array-buffer :static-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
-
-    (loop for indices in (list points lines triangles filled-triangles)
-       for ebo in ebos
+    (loop for indices in (list triangles filled-triangles)
+       for ebo in (cddr ebos)
        do
          (let ((gl-indices (to-gl-array indices :unsigned-int)))
-           (format t "Filling VBO and EBO:~a with indices ~a~%" ebo indices)
+           (format t "Filling ebo ~a of vbo ~a with indices ~a~%" ebo (cadr vbos) indices)
            (gl:bind-buffer :element-array-buffer ebo)
            (gl:buffer-data :element-array-buffer :static-draw gl-indices)
            (gl:free-gl-array gl-indices)))))
@@ -157,19 +170,24 @@
   (call-next-method)
   (with-slots (vbos ebos points lines triangles filled-triangles shader-programs) object
 
+    (when (> (length points) 0)
     (gl:polygon-mode :front-and-back :line)
     (gl:bind-buffer :array-buffer (car vbos))
     (use-program (car shader-programs))
-    (when (> (length points) 0)
       (gl:bind-buffer :element-array-buffer (point-ebo ebos))
       (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
 
     (when (> (length lines) 0)
+    (gl:polygon-mode :front-and-back :line)
+    (gl:bind-buffer :array-buffer (car vbos))
+    (use-program (car shader-programs))
       (gl:bind-buffer :element-array-buffer (line-ebo ebos))
       (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 
     (when (> (length triangles) 0)
       (gl:bind-buffer :array-buffer (cadr vbos))
+      (use-program (cadr shader-programs))
+      (gl:polygon-mode :front-and-back :line)
       (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
       (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length triangles)))
 
