@@ -22,8 +22,13 @@
 (defmethod render ((viewer viewer) viewport)
   (declare (ignorable viewport))
   (with-slots (objects viewport modified) viewer
-    (gl:enable :line-smooth :polygon-smooth
-               :depth-test :depth-clamp)
+    (gl:enable :line-smooth
+               :polygon-smooth
+               :cull-face
+               :depth-test :depth-clamp
+               :blend)
+    (gl:front-face :cw)
+    (gl:blend-func :one :one-minus-src-alpha)
     (gl:clear-color 0.0 0.0 0.0 1.0)
     (gl:clear :color-buffer :depth-buffer)
     (dolist (object objects)
@@ -87,8 +92,7 @@
         (with-viewer-lock (viewer)
           (with-slots (objects) viewer
             (dolist (object objects)
-              (cleanup (cdr object))))))
-      )))
+              (cleanup (cdr object)))))))))
 
 (defun show-viewer (viewer &optional (in-thread nil))
   (if in-thread
@@ -99,8 +103,7 @@
 (defun set-viewport (viewer new-viewport)
   (with-viewer-lock (viewer)
     (with-slots (viewport modified) viewer
-      (setf viewport new-viewport)
-      )))
+      (setf viewport new-viewport))))
 
 (defun close-viewer (viewer)
   (with-viewer-lock (viewer)
@@ -129,7 +132,6 @@
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmtranslate (slot-value (cdr items) 'transformation) offset)
-        ;; (setf modified t)
         ))))
 
 (defun rotate-object (viewer object-name vector angle)
@@ -137,7 +139,6 @@
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmrotate (slot-value (cdr items) 'transformation) vector angle)
-        ;; (setf modified t)
         ))))
 
 (defun rm-object (viewer name)
@@ -146,7 +147,8 @@
       (when-let ((items (assoc name objects)))
         (push items to-cleanup)
         (setf objects (remove name objects :key #'car))
-        (setf modified t)))))
+        (setf modified t)
+        ))))
 
 (defun force-redraw (viewer)
   (with-viewer-lock (viewer)

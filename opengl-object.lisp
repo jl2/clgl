@@ -11,21 +11,24 @@
    (shader-programs :initform
                     (list
                      (make-instance
-                     'shader-program
-                     :vertex (read-file
-                              (merge-pathnames *shader-dir*
-                                               "default-line-vertex.glsl"))
-                     :fragment(read-file
+                      'shader-program
+                      :inputs '(("position" . 3) ("color" . 4))
+                      :vertex (read-file
                                (merge-pathnames *shader-dir*
-                                                "default-fragment.glsl")))
+                                                "default-line-vertex.glsl"))
+                      :fragment(read-file
+                                (merge-pathnames *shader-dir*
+                                                 "default-fragment.glsl")))
                      (make-instance
-                     'shader-program
-                     :vertex (read-file
-                              (merge-pathnames *shader-dir*
-                                               "default-filled-vertex.glsl"))
-                     :fragment(read-file
+                      'shader-program
+                      :inputs '(("position" . 3) ("normal" . 3) ("color" . 4))
+
+                      :vertex (read-file
                                (merge-pathnames *shader-dir*
-                                                "default-fragment.glsl"))))
+                                                "default-filled-vertex.glsl"))
+                      :fragment(read-file
+                                (merge-pathnames *shader-dir*
+                                                 "default-fragment.glsl"))))
                     :type (or null cons))
    (transformation :initform (meye 4) :type mat4))
   (:documentation "Base class for all objects that can be rendered in a scene."))
@@ -66,18 +69,19 @@
 (defmethod render ((object opengl-object) viewport)
   (with-slots (vao transformation shader-programs) object
     (when (/= 0 vao)
-      (gl:depth-range -100.0 100.0)
       (gl:bind-vertex-array vao)
+      (gl:depth-range -100.0 100.0)
       (dolist (shader-program shader-programs)
         (with-slots (program) shader-program
           (let ((location (gl:get-uniform-location program "projectionMatrix")))
-            (gl:uniform-matrix location
-                               4
-                               (vector
-                                (marr4
-                                 (m*
-                                  (apply-view-transformation viewport transformation))))
-                               nil)))))))
+            (gl:uniform-matrix
+             location
+             4
+             (vector
+              (marr4
+               (m*
+                (apply-view-transformation viewport transformation))))
+             nil)))))))
 
 (defmethod render :after ((object opengl-object) viewport)
   (gl:bind-vertex-array 0))

@@ -42,6 +42,7 @@
    #:xz-square
    #:yz-square
 
+   #:rotation-around-y
    #:make-parametric
    #:sphere-x
    #:sphere-y

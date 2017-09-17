@@ -42,23 +42,22 @@
     (setf vertex-shader (compile-shader :vertex-shader vertex-text))
     (setf fragment-shader (compile-shader :fragment-shader fragment-text))
     (setf program (gl:create-program))
-      (gl:attach-shader program vertex-shader)
-      (gl:attach-shader program fragment-shader)
-      (gl:link-program program)
+    (gl:attach-shader program vertex-shader)
+    (gl:attach-shader program fragment-shader)
+    (gl:link-program program)
 
-      (let ((status (gl:get-program program :link-status)))
-        (format t "link-program: ~a~%~a~%" status(gl:get-program-info-log program)))
+    (let ((status (gl:get-program program :link-status)))
+      (format t "link-program: ~a~%~a~%" status(gl:get-program-info-log program)))
 
-      (gl:validate-program program)
-      (let ((status (gl:get-program program :validate-status)))
-        (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program)))))
+    (gl:validate-program program)
+    (let ((status (gl:get-program program :validate-status)))
+      (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program)))))
 
 
 (defun use-program (program)
   (with-slots (layout program) program
     (let* ((float-size   (cffi:foreign-type-size :float))
            (stride       (* (apply #'+ (mapcar #'cdr layout)) float-size)))
-
       (loop for entry in layout
          for count from 0
          do
@@ -66,7 +65,6 @@
                   (attrib-size (cdr entry))
                   (position-offset  (* count float-size))
                   (position-attrib (gl:get-attrib-location program attrib-name)))
-             ;; (format t "~a ~a ~a ~a~%" attrib-name attrib-size position-offset position-attrib)
              (gl:enable-vertex-attrib-array position-attrib)
              (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride position-offset))))
     (gl:use-program program)))

@@ -22,10 +22,10 @@
     (mortho left right bottom top near far)))
 
 (defclass perspective (projection)
-  ((fovy :initarg :fovy :initform (* 30 (/ pi 180)))
-   (aspect :initarg :aspect :initform 1.2)
-   (near :initarg :near :initform 10.0)
-   (far :initarg :far :initform 2.0)))
+  ((fovy :initarg :fovy :initform (* 50 (/ pi 180)))
+   (aspect :initarg :aspect :initform 1.0)
+   (near :initarg :near :initform -20.0)
+   (far :initarg :far :initform 200.0)))
 
 (defmethod get-transform ((view perspective))
   (with-slots (fovy aspect near far) view
@@ -65,9 +65,9 @@
      (mtranslation (vec3 0 0  radius)))))
 
 (defclass look-at-viewport (3d-viewport)
-  ((eye :initarg :eye :initform (vec3 16.0f0 6.0f0 6.0f0))
+  ((eye :initarg :eye :initform (vec3 16.0f0 16.0f0 16.0f0))
    (center :initarg :center :initform (vec3 0.0f0 0.0f0 0.0f0))
-   (up :initarg :up :initform +vz+)))
+   (up :initarg :up :initform +vy+)))
 
 (defmethod get-transform ((view look-at-viewport))
   (with-slots (eye center up) view 

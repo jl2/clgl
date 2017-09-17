@@ -25,31 +25,31 @@
 (defun filled-ebo (ebos)
   (cadddr ebos))
 
+(defun insert-vect (buffer pt)
+  (etypecase pt
+    (vec3
+     (vector-push-extend (vx pt) buffer)
+     (vector-push-extend (vy pt) buffer)
+     (vector-push-extend (vz pt) buffer))
+    (vec4
+     (vector-push-extend (vx pt) buffer)
+     (vector-push-extend (vy pt) buffer)
+     (vector-push-extend (vz pt) buffer)
+     (vector-push-extend (vw pt) buffer))))
+
 (defconstant +line-data-stride+ 7)
 (defun insert-pc-in-buffer (buffer pt color)
   (let ((olen (length buffer)))
-    (vector-push-extend (vx pt) buffer)
-    (vector-push-extend (vy pt) buffer)
-    (vector-push-extend (vz pt) buffer)
-    (vector-push-extend (red color) buffer)
-    (vector-push-extend (green color) buffer)
-    (vector-push-extend (blue color) buffer)
-    (vector-push-extend (alpha color) buffer)
+    (insert-vect buffer pt)
+    (insert-vect buffer color)
     (floor (/ olen +line-data-stride+))))
 
 (defconstant +filled-data-stride+ 10)
 (defun insert-pnc-in-buffer (buffer pt normal color)
   (let ((olen (length buffer)))
-    (vector-push-extend (vx pt) buffer)
-    (vector-push-extend (vy pt) buffer)
-    (vector-push-extend (vz pt) buffer)
-    (vector-push-extend (vx normal) buffer)
-    (vector-push-extend (vy normal) buffer)
-    (vector-push-extend (vz normal) buffer)
-    (vector-push-extend (red color) buffer)
-    (vector-push-extend (green color) buffer)
-    (vector-push-extend (blue color) buffer)
-    (vector-push-extend (alpha color) buffer)
+    (insert-vect buffer pt)
+    (insert-vect buffer normal)
+    (insert-vect buffer color)
     (floor (/ olen +filled-data-stride+))))
 
 (defun add-point (object pt color)
@@ -170,17 +170,14 @@
   (call-next-method)
   (with-slots (vbos ebos points lines triangles filled-triangles shader-programs) object
 
-    (when (> (length points) 0)
     (gl:polygon-mode :front-and-back :line)
     (gl:bind-buffer :array-buffer (car vbos))
     (use-program (car shader-programs))
+    (when (> (length points) 0)
       (gl:bind-buffer :element-array-buffer (point-ebo ebos))
       (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
 
     (when (> (length lines) 0)
-    (gl:polygon-mode :front-and-back :line)
-    (gl:bind-buffer :array-buffer (car vbos))
-    (use-program (car shader-programs))
       (gl:bind-buffer :element-array-buffer (line-ebo ebos))
       (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 

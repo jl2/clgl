@@ -151,15 +151,15 @@
 
 (defun sphere-x (uv vv)
   (declare (ignorable uv vv))
-  (* (cos uv) (sin uv)))
+  (* (sin uv) (cos vv)))
 
 (defun sphere-y (uv vv)
   (declare (ignorable uv vv))
-  (* (cos uv) (cos uv)))
+  (* (cos uv) (cos vv)))
 
 (defun sphere-z (uv vv)
   (declare (ignorable uv vv))
-  (sin uv))
+  (sin vv))
 
 (defun plane-x (uv vv)
   (declare (ignorable uv vv))
@@ -212,5 +212,22 @@
               (vv (+ v-min (* j dv)))
               (nu (+ u-min (* (1+ i) du)))
               (nv (+ v-min (* (1+ j) dv))))
-          (add-quad object color xf yf zf uv vv nu nv filled))))
+          (add-quad object color
+                    xf yf zf
+                    uv vv nu nv
+                    filled))))
     object))
+
+(defun rotation-around-y (viewer frames)
+  (clgl:simple-animation (i frames)
+    (clgl:set-viewport
+     viewer
+     (make-instance
+      'clgl:look-at-viewport 
+      :projection (make-instance 'clgl:perspective
+                                 :near -25
+                                 :far 25
+                                 :fovy (* 80 (/ pi 180)))
+      :eye (vec3 (* 12 (cos (* i (/ pi 180)))) 8 (* 12 (sin (* i (/ pi 180)))))
+      :up +vy+
+      ))))
