@@ -21,5 +21,6 @@
                (:file "shaders")
                (:file "viewer")
                (:file "viewport")
+               (:file "transformation")
                (:file "utilities")))
 

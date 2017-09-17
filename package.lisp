@@ -4,6 +4,7 @@
 
 (defpackage #:clgl
   (:use #:cl #:alexandria #:glfw #:3d-vectors #:3d-matrices)
+
   (:export
    #:viewport
    #:orthographic
@@ -50,5 +51,7 @@
    #:plane-x
    #:plane-y
    #:plane-z
-   #:simple-animation))
+   #:simple-animation
+
+   #:get-matrix))
 

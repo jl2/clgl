@@ -135,7 +135,7 @@
 
     (let ((gl-vertices (to-gl-float-array line-vertex-data)))
       (gl:bind-buffer :array-buffer (car vbos))
-      (gl:buffer-data :array-buffer :static-draw gl-vertices)
+      (gl:buffer-data :array-buffer :dynamic-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
 
     (loop for indices in (list points lines)
@@ -149,7 +149,7 @@
 
     (let ((gl-vertices (to-gl-float-array filled-vertex-data)))
       (gl:bind-buffer :array-buffer (cadr vbos))
-      (gl:buffer-data :array-buffer :static-draw gl-vertices)
+      (gl:buffer-data :array-buffer :dynamic-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
     (loop for indices in (list triangles filled-triangles)
        for ebo in (cddr ebos)
