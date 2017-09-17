@@ -54,8 +54,8 @@
       (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program)))))
 
 
-(defun use-program (program)
-  (with-slots (layout program) program
+(defun use-program (shader-program transformation viewport)
+  (with-slots (layout program) shader-program
     (let* ((float-size   (cffi:foreign-type-size :float))
            (stride       (* (apply #'+ (mapcar #'cdr layout)) float-size)))
       (loop for entry in layout
@@ -67,4 +67,15 @@
                   (position-attrib (gl:get-attrib-location program attrib-name)))
              (gl:enable-vertex-attrib-array position-attrib)
              (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride position-offset))))
-    (gl:use-program program)))
+    (gl:use-program program)
+    (let ((location (gl:get-uniform-location program "projectionMatrix")))
+      (gl:uniform-matrix
+       location
+       4
+       (vector
+        (marr4
+         (m*
+          (apply-view-transformation viewport transformation))))
+       nil))
+    ))
+

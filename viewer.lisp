@@ -24,7 +24,7 @@
   (with-slots (objects viewport modified) viewer
     (gl:enable :line-smooth
                :polygon-smooth
-               :cull-face
+;;               :cull-face
                :depth-test :depth-clamp
                :blend)
     (gl:front-face :cw)

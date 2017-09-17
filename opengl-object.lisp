@@ -47,8 +47,6 @@
 
 (defmethod fill-buffers :after ((object opengl-object))
   (format t "Unbinding vertex array...~%")
-    (with-slots (shader-programs) object
-      (use-program (car shader-programs)))
   (gl:bind-vertex-array 0))
 
 (defmethod cleanup ((object opengl-object))
@@ -70,18 +68,7 @@
   (with-slots (vao transformation shader-programs) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao)
-      (gl:depth-range -100.0 100.0)
-      (dolist (shader-program shader-programs)
-        (with-slots (program) shader-program
-          (let ((location (gl:get-uniform-location program "projectionMatrix")))
-            (gl:uniform-matrix
-             location
-             4
-             (vector
-              (marr4
-               (m*
-                (apply-view-transformation viewport transformation))))
-             nil)))))))
+      (gl:depth-range -100.0 100.0))))
 
 (defmethod render :after ((object opengl-object) viewport)
   (gl:bind-vertex-array 0))

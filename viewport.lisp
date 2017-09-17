@@ -71,20 +71,20 @@
 
 (defmethod get-transform ((view look-at-viewport))
   (with-slots (eye center up) view 
-   (let ((vlen  (vlength (v- eye center)))
-          (mat (mlookat eye center up)))
-      (m* mat 
-          (mscaling (vec3 (/ 1.0f0 vlen)
+   (let ((vlen  (vlength (v- center eye )))
+          (mat (mlookat center eye up)))
+     (m* mat
+         (mscaling (vec3 (/ 1.0f0 vlen)
                           (/ 1.0f0 vlen)
-                          (/ 1.0f0 vlen)))))))
+                          (/ 1.0f0 vlen)))
+          
+          mat))))
 
 
 (defun apply-view-transformation (viewport object-transform)
   (with-slots (projection) viewport
     (m* 
-     (get-transform projection)
+;;     (get-transform projection)
      (get-transform viewport)
-     
      object-transform
-        
         )))

@@ -180,24 +180,29 @@
              (vec3 (funcall xf uv nv)
                    (funcall yf uv nv)
                    (funcall zf uv nv))
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
+
              (vec3 (funcall xf uv vv)
                    (funcall yf uv vv)
                    (funcall zf uv vv))
+
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
              color)
 
     (funcall tri-function obj
              (vec3 (funcall xf nu nv)
                    (funcall yf nu nv)
                    (funcall zf nu nv))
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
+
              (vec3 (funcall xf uv nv)
                    (funcall yf uv nv)
                    (funcall zf uv nv))
+
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
+
              color)))
 
 (defun make-parametric (&key (xf #'sphere-x) (yf #'sphere-y) (zf #'sphere-z) (u-steps 20) (v-steps 20) (filled nil)
@@ -206,8 +211,8 @@
   (let ((object (make-instance 'clgl:primitives))
         (du (/ (- u-max u-min) u-steps))
         (dv (/ (- v-max v-min) v-steps)))
-    (dotimes (i u-steps)
-      (dotimes (j v-steps)
+    (dotimes (i (1+ u-steps))
+      (dotimes (j (1+ v-steps))
         (let ((uv (+ u-min (* i du)))
               (vv (+ v-min (* j dv)))
               (nu (+ u-min (* (1+ i) du)))
@@ -225,9 +230,8 @@
      (make-instance
       'clgl:look-at-viewport 
       :projection (make-instance 'clgl:perspective
-                                 :near -25
-                                 :far 25
-                                 :fovy (* 80 (/ pi 180)))
-      :eye (vec3 (* 12 (cos (* i (/ pi 180)))) 8 (* 12 (sin (* i (/ pi 180)))))
-      :up +vy+
-      ))))
+                                 :near -50
+                                 :far 50
+                                 :fovy (* 40 (/ pi 180)))
+      :eye (vec3 (* 2 (cos (* i (/ pi 180)))) 2 (* 2 (sin (* i (/ pi 180)))))
+      :up +vy+))))

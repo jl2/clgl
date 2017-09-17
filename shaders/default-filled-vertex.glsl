@@ -6,7 +6,7 @@ layout(location = 2) in vec4 color;
 
 uniform mat4 projectionMatrix;
 
-smooth out vec4 Color;
+out vec4 Color;
 
 void main()
 {

@@ -26,31 +26,25 @@
   (cadddr ebos))
 
 (defun insert-vect (buffer pt)
-  (etypecase pt
-    (vec3
-     (vector-push-extend (vx pt) buffer)
-     (vector-push-extend (vy pt) buffer)
-     (vector-push-extend (vz pt) buffer))
+  (vector-push-extend (vx pt) buffer)
+  (vector-push-extend (vy pt) buffer)
+  (vector-push-extend (vz pt) buffer)
+  (typecase pt
     (vec4
-     (vector-push-extend (vx pt) buffer)
-     (vector-push-extend (vy pt) buffer)
-     (vector-push-extend (vz pt) buffer)
      (vector-push-extend (vw pt) buffer))))
 
-(defconstant +line-data-stride+ 7)
 (defun insert-pc-in-buffer (buffer pt color)
   (let ((olen (length buffer)))
     (insert-vect buffer pt)
     (insert-vect buffer color)
-    (floor (/ olen +line-data-stride+))))
+    (floor (/ olen 7))))
 
-(defconstant +filled-data-stride+ 10)
 (defun insert-pnc-in-buffer (buffer pt normal color)
   (let ((olen (length buffer)))
     (insert-vect buffer pt)
     (insert-vect buffer normal)
     (insert-vect buffer color)
-    (floor (/ olen +filled-data-stride+))))
+    (floor (/ olen 10))))
 
 (defun add-point (object pt color)
   (declare (type primitives object)
@@ -168,11 +162,13 @@
   
 (defmethod render ((object primitives) viewport)
   (call-next-method)
-  (with-slots (vbos ebos points lines triangles filled-triangles shader-programs) object
+  (with-slots (vbos ebos transformation points lines triangles filled-triangles shader-programs) object
 
     (gl:polygon-mode :front-and-back :line)
     (gl:bind-buffer :array-buffer (car vbos))
-    (use-program (car shader-programs))
+    
+    (use-program (car shader-programs) transformation viewport)
+
     (when (> (length points) 0)
       (gl:bind-buffer :element-array-buffer (point-ebo ebos))
       (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
@@ -183,14 +179,14 @@
 
     (when (> (length triangles) 0)
       (gl:bind-buffer :array-buffer (cadr vbos))
-      (use-program (cadr shader-programs))
+      (use-program (cadr shader-programs) transformation viewport)
       (gl:polygon-mode :front-and-back :line)
       (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
       (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length triangles)))
 
     (when (> (length filled-triangles) 0)
       (gl:bind-buffer :array-buffer (cadr vbos))
-      (use-program (cadr shader-programs))
+      (use-program (cadr shader-programs) transformation viewport)
       (gl:polygon-mode :front-and-back :fill)
       (gl:bind-buffer :element-array-buffer (filled-ebo ebos))
       (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles)))
