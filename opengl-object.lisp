@@ -14,22 +14,20 @@
                       'shader-program
                       :inputs '(("position" . 3) ("color" . 4))
                       :vertex (read-file
-                               (merge-pathnames *shader-dir*
-                                                "default-line-vertex.glsl"))
+                               (merge-pathnames *shader-dir* "default-line-vertex.glsl"))
                       :fragment(read-file
-                                (merge-pathnames *shader-dir*
-                                                 "default-fragment.glsl")))
+                                (merge-pathnames *shader-dir* "default-fragment.glsl")))
+
                      (make-instance
                       'shader-program
                       :inputs '(("position" . 3) ("normal" . 3) ("color" . 4))
 
                       :vertex (read-file
-                               (merge-pathnames *shader-dir*
-                                                "default-filled-vertex.glsl"))
+                               (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
                       :fragment(read-file
-                                (merge-pathnames *shader-dir*
-                                                 "default-fragment.glsl"))))
+                                (merge-pathnames *shader-dir* "default-fragment.glsl"))))
                     :type (or null cons))
+
    (transformation :initform (meye 4) :type mat4))
   (:documentation "Base class for all objects that can be rendered in a scene."))
 
@@ -68,7 +66,7 @@
   (with-slots (vao transformation shader-programs) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao)
-      (gl:depth-range -100.0 100.0))))
+      (gl:depth-range -1000.0 1000.0))))
 
 (defmethod render :after ((object opengl-object) viewport)
   (gl:bind-vertex-array 0))

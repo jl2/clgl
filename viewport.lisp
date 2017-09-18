@@ -4,50 +4,30 @@
 
 (in-package #:clgl)
 
-(defgeneric get-transform (view))
-
-(defclass projection ()
-  ())
-
-(defclass orthographic (projection)
-  ((left :initarg :left  :initform -1.0)
-   (right :initarg :right :initform 1.0)
-   (top :initarg :top :initform 1.0)
-   (bottom :initarg :bottom :initform -1.0)
-   (near :initarg :near :initform -1.0)
-   (far :initarg :far :initform 1.0)))
-
-(defmethod get-transform ((view orthographic))
-  (with-slots (left right top bottom near far) view
-    (mortho left right bottom top near far)))
-
-(defclass perspective (projection)
-  ((fovy :initarg :fovy :initform (* 50 (/ pi 180)))
-   (aspect :initarg :aspect :initform 1.0)
-   (near :initarg :near :initform -20.0)
-   (far :initarg :far :initform 200.0)))
-
-(defmethod get-transform ((view perspective))
-  (with-slots (fovy aspect near far) view
-    (mperspective fovy aspect near far)
-    ))
-
 (defclass viewport ()
   ((projection :initarg :projection :initform (make-instance 'orthographic))))
 
-(defclass 2d-viewport (viewport)
-  ((radius :initarg :radius :initform 10.0)))
+(defgeneric get-transform-matrix (view))
+(defgeneric get-projection-matrix (view))
 
-(defmethod get-transform ((view 2d-viewport))
+(defmethod get-projection-matrix (view)
+  (get-transform-matrix (slot-value view 'projection)))
+
+(defclass 2d-viewport (viewport)
+  ((projection :initarg :projection :initform (make-instance 'orthographic))
+   (radius :initarg :radius :initform 10.0)))
+
+(defmethod get-transform-matrix ((view 2d-viewport))
   (declare (ignorable view))
-  (with-slots (radius) view
-    (with-slots (left right top bottom near far) (slot-value view 'projection)
-      (setf left (- radius))
-      (setf right radius)
-      (setf top radius)
-      (setf bottom (- radius))
-      (setf near (- radius))
-      (setf far radius))))
+  (with-slots (radius projection) view
+    (setf projection (make-instance 'orthographic :left (- radius)
+                                    :left (- radius)
+                                    :right radius
+                                    :top radius
+                                    :bottom (- radius)
+                                    :near (- radius)
+                                    :far radius))))
+
 
 (defclass 3d-viewport (viewport)
   ((projection :initarg :projection :initform (make-instance 'perspective))))
@@ -57,34 +37,26 @@
    (theta :initarg :theta :initform (/ pi 4))
    (phi :initarg :phi :initform (/ pi 4))))
 
-(defmethod get-transform ((view spherical-viewport))
+(defmethod get-transform-matrix ((view spherical-viewport))
   (with-slots (radius theta phi) view
-    (m* 
-     (mrotation +vy+ theta)
-     (mrotation +vx+ phi)
-     (mtranslation (vec3 0 0  radius)))))
+    (let ((return-value (m* 
+                         (mrotation +vy+ theta)
+                         (mrotation +vx+ phi)
+                         (mtranslation (vec3 0 0 (- radius))))))
+      (declare (type mat4 return-value))
+      (setf (mcref return-value 3 3) (/ 1.0 radius))
+      return-value)))
 
 (defclass look-at-viewport (3d-viewport)
   ((eye :initarg :eye :initform (vec3 16.0f0 16.0f0 16.0f0))
    (center :initarg :center :initform (vec3 0.0f0 0.0f0 0.0f0))
-   (up :initarg :up :initform +vy+)))
-
-(defmethod get-transform ((view look-at-viewport))
-  (with-slots (eye center up) view 
-   (let ((vlen  (vlength (v- center eye )))
-          (mat (mlookat center eye up)))
-     (m* mat
-         (mscaling (vec3 (/ 1.0f0 vlen)
-                          (/ 1.0f0 vlen)
-                          (/ 1.0f0 vlen)))
-          
-          mat))))
+   (up :initarg :up :initform +vz+)))
 
 
-(defun apply-view-transformation (viewport object-transform)
-  (with-slots (projection) viewport
-    (m* 
-;;     (get-transform projection)
-     (get-transform viewport)
-     object-transform
-        )))
+(defmethod get-transform-matrix ((view look-at-viewport))
+  (with-slots (eye center up) view
+    (let ((ilen (/ 1.0 (vlength (v- center eye))))
+          (return-value (mlookat eye center up)))
+       ;; (setf (mcref return-value 3 3) ilen)
+       ;; return-value)))
+      (m* (mscaling (vec3 ilen ilen ilen)) return-value))))

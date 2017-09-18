@@ -68,14 +68,15 @@
              (gl:enable-vertex-attrib-array position-attrib)
              (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride position-offset))))
     (gl:use-program program)
-    (let ((location (gl:get-uniform-location program "projectionMatrix")))
-      (gl:uniform-matrix
-       location
-       4
-       (vector
-        (marr4
-         (m*
-          (apply-view-transformation viewport transformation))))
-       nil))
-    ))
+    (let ((xform-location (gl:get-uniform-location program "transformationMatrix"))
+          (proj-location (gl:get-uniform-location program "projectionMatrix")))
+      (gl:uniform-matrix xform-location 4 (vector
+                                           (marr4 (m*
+                                                   (get-transform-matrix viewport)
+                                                   transformation 
+                                                   )))
+                         nil)
+      (gl:uniform-matrix proj-location 4 (vector
+                                          (marr4 (get-projection-matrix viewport)))
+                         nil))))
 

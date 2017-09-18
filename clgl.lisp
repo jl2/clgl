@@ -223,15 +223,18 @@
                     filled))))
     object))
 
-(defun rotation-around-y (viewer frames)
+(defun rotation-around-y (viewer &optional (radius 5) (frames 90))
   (clgl:simple-animation (i frames)
     (clgl:set-viewport
      viewer
      (make-instance
       'clgl:look-at-viewport 
       :projection (make-instance 'clgl:perspective
-                                 :near -50
-                                 :far 50
-                                 :fovy (* 40 (/ pi 180)))
-      :eye (vec3 (* 2 (cos (* i (/ pi 180)))) 2 (* 2 (sin (* i (/ pi 180)))))
-      :up +vy+))))
+                                 :near 1
+                                 :far 500
+                                 :fovy (* 50 (/ pi 180)))
+      :eye (vec3 (* radius (cos (* i (/ pi 180))))
+                 (* radius (sin (* i (/ pi 180))))
+                 radius)
+      :up +vz+))))
+

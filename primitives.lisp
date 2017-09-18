@@ -25,6 +25,9 @@
 (defun filled-ebo (ebos)
   (cadddr ebos))
 
+(defun tol-equal (a b &optional (tolerance 0.001))
+  (< (abs (- a b )) tolerance))
+
 (defun insert-vect (buffer pt)
   (vector-push-extend (vx pt) buffer)
   (vector-push-extend (vy pt) buffer)

@@ -58,12 +58,13 @@
 (defun viewer-thread-function (viewer)
   (with-init
     (let* ((monitor (glfw:get-primary-monitor))
-           (cur-mode (glfw:get-video-mode monitor))
-           (cur-width (getf cur-mode '%cl-glfw3:width))
-           (cur-height (getf cur-mode '%cl-glfw3:height)))
+           ;; (cur-mode (glfw:get-video-mode monitor))
+           ;; (cur-width (getf cur-mode '%cl-glfw3:width))
+           ;; (cur-height (getf cur-mode '%cl-glfw3:height))
+           )
       (with-window (:title "OpenGL Scene Viewer"
-                           :width (floor (/ cur-width 2.0f0))
-                           :height (floor (/ cur-height 2.0f0))
+                           :width 400
+                           :height 400
                            :decorated t
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile
@@ -124,7 +125,6 @@
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))
-        ;; (setf modified t)
         ))))
 
 (defun translate-object (viewer object-name offset)

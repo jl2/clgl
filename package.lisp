@@ -9,8 +9,8 @@
    #:viewport
    #:orthographic
    #:perspective
-   #:get-transform
-   #:apply-view-transformation
+   #:get-transform-matrix
+   #:get-projection-matrix
    #:2d-viewport
    #:spherical-viewport
    #:look-at-viewport
