@@ -72,11 +72,12 @@
           (proj-location (gl:get-uniform-location program "projectionMatrix")))
       (gl:uniform-matrix xform-location 4 (vector
                                            (marr4 (m*
+
+                                                   transformation
                                                    (get-transform-matrix viewport)
-                                                   transformation 
                                                    )))
-                         nil)
+                         t)
       (gl:uniform-matrix proj-location 4 (vector
                                           (marr4 (get-projection-matrix viewport)))
-                         nil))))
+                         t))))
 

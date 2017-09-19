@@ -28,7 +28,6 @@
                                     :near (- radius)
                                     :far radius))))
 
-
 (defclass 3d-viewport (viewport)
   ((projection :initarg :projection :initform (make-instance 'perspective))))
 
@@ -39,13 +38,12 @@
 
 (defmethod get-transform-matrix ((view spherical-viewport))
   (with-slots (radius theta phi) view
-    (let ((return-value (m* 
-                         (mrotation +vy+ theta)
-                         (mrotation +vx+ phi)
-                         (mtranslation (vec3 0 0 (- radius))))))
-      (declare (type mat4 return-value))
-      (setf (mcref return-value 3 3) (/ 1.0 radius))
-      return-value)))
+    (let ((ilen (/ 1.0 radius)))
+      (m* 
+       (mrotation +vy+ theta)
+       (mrotation +vx+ phi)
+       (mtranslation (vec3 0 (- radius) 0))
+       (mscaling (vec3 ilen ilen ilen))))))
 
 (defclass look-at-viewport (3d-viewport)
   ((eye :initarg :eye :initform (vec3 16.0f0 16.0f0 16.0f0))
@@ -55,8 +53,9 @@
 
 (defmethod get-transform-matrix ((view look-at-viewport))
   (with-slots (eye center up) view
-    (let ((ilen (/ 1.0 (vlength (v- center eye))))
+    (let ((ilen (/ 1 (vlength (v- eye center))))
           (return-value (mlookat eye center up)))
-       ;; (setf (mcref return-value 3 3) ilen)
-       ;; return-value)))
-      (m* (mscaling (vec3 ilen ilen ilen)) return-value))))
+      ;; return-value)))
+     (m* return-value (mscaling (vec3 ilen ilen ilen))))))
+
+

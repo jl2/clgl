@@ -12,5 +12,5 @@ void main()
 {
     Color = color;
     gl_PointSize = 1.0;
-    gl_Position = transformationMatrix * projectionMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 1.0);
 }

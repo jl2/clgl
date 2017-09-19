@@ -14,8 +14,7 @@ void main()
     vec4 transformedPosition = transformationMatrix * vec4(position.xyz, 1.0);
     vec4 L = vec4(normalize(vec3(transformedPosition.xyz - vec3(0.0,0.0,10.0))), 0.0);
 
-    Color = vec4(0.0125, 0.25, 0.0125, 1.0) + color * max(0.2, dot(L, inverse(transformationMatrix) * vec4(normal, 0.0)));
-    // Color = color;
+    Color = vec4(0.0125, 0.25, 0.0125, 1.0) + color * max(0.2, dot(L, transpose(inverse(transformationMatrix)) * vec4(normal, 0.0)));
     gl_PointSize = 1.0;
-    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * transformedPosition;
 }

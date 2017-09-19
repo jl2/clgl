@@ -205,8 +205,15 @@
 
              color)))
 
-(defun make-parametric (&key (xf #'sphere-x) (yf #'sphere-y) (zf #'sphere-z) (u-steps 20) (v-steps 20) (filled nil)
-                          (u-min 0.0) (u-max pi) (v-min 0.0) (v-max (* 2 pi))
+(defun make-parametric (&key
+                          (xf #'sphere-x)
+                          (yf #'sphere-y)
+                          (zf #'sphere-z)
+                          (u-steps 20)
+                          (v-steps 20)
+                          (filled nil)
+                          (u-min 0.0) (u-max pi)
+                          (v-min 0.0) (v-max (* 2 pi))
                           (color (vec4 0 1 0 1)))
   (let ((object (make-instance 'clgl:primitives))
         (du (/ (- u-max u-min) u-steps))
@@ -223,7 +230,7 @@
                     filled))))
     object))
 
-(defun rotation-around-y (viewer &optional (radius 5) (frames 90))
+(defun rotation-around-y (viewer &optional (radius 20) (frames 90))
   (clgl:simple-animation (i frames)
     (clgl:set-viewport
      viewer
@@ -232,9 +239,11 @@
       :projection (make-instance 'clgl:perspective
                                  :near 1
                                  :far 500
-                                 :fovy (* 50 (/ pi 180)))
-      :eye (vec3 (* radius (cos (* i (/ pi 180))))
-                 (* radius (sin (* i (/ pi 180))))
-                 radius)
-      :up +vz+))))
+                                 :fovy (* 80 (/ pi 180)))
+      :eye (vec3 
+            (* radius (cos (* i (/ pi 180))))     
+            radius
+            
+                 (* radius (sin (* i (/ pi 180)))))
+      :up +vy+))))
 
