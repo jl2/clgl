@@ -59,3 +59,12 @@
      (m* return-value (mscaling (vec3 ilen ilen ilen))))))
 
 
+(defclass simple-viewport (3d-viewport)
+  ((distance :initform 10 :initarg :distance)))
+
+
+(defmethod get-transform-matrix ((view simple-viewport))
+  (with-slots (distance) view
+    (mtranslation (vec3 0 0 (- distance)))))
+
+

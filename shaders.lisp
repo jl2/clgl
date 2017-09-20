@@ -73,8 +73,9 @@
       (gl:uniform-matrix xform-location 4 (vector
                                            (marr4 (m*
 
-                                                   transformation
                                                    (get-transform-matrix viewport)
+                                                   transformation
+                                                   
                                                    )))
                          t)
       (gl:uniform-matrix proj-location 4 (vector

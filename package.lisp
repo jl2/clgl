@@ -14,6 +14,7 @@
    #:2d-viewport
    #:spherical-viewport
    #:look-at-viewport
+   #:simple-viewport
 
    #:viewer
    #:show-viewer

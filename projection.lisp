@@ -20,10 +20,10 @@
     (mortho left right bottom top near far)))
 
 (defclass perspective (projection)
-  ((fovy :initarg :fovy :initform (* 50 (/ pi 180)))
+  ((fovy :initarg :fovy :initform 50)
    (aspect :initarg :aspect :initform 1.0)
    (near :initarg :near :initform 1.0)
-   (far :initarg :far :initform 2000.0)))
+   (far :initarg :far :initform 200.0)))
 
 (defmethod get-transform-matrix ((view perspective))
   (with-slots (fovy aspect near far) view

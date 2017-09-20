@@ -235,15 +235,9 @@
     (clgl:set-viewport
      viewer
      (make-instance
-      'clgl:look-at-viewport 
+      'clgl:simple-viewport 
       :projection (make-instance 'clgl:perspective
                                  :near 1
-                                 :far 500
-                                 :fovy (* 80 (/ pi 180)))
-      :eye (vec3 
-            (* radius (cos (* i (/ pi 180))))     
-            radius
-            
-                 (* radius (sin (* i (/ pi 180)))))
-      :up +vy+))))
+                                 :far 200
+                                 :fovy 50)))))
 
