@@ -90,7 +90,7 @@
 
 
 (defun axis-viewer (&key (name 'object) (object nil) (show t) (in-thread nil))
-  (let ((viewer (make-instance 'viewer)))
+  (let ((viewer (make-instance 'viewer :viewport (make-instance 'clgl:simple-viewport :distance 4))))
     (add-object viewer 'axis (make-3d-axis))
     (when object
       (add-object viewer name object ))
@@ -120,8 +120,8 @@
                   color)))
     prims))
 
-(defmacro simple-animation ((variable steps) &body body)
-  `(dotimes (,variable (1+ ,steps))
+(defmacro simple-animation ((variable duration) &body body)
+  `(dotimes (,variable (1+ (* 30 ,duration)))
      ,@body
      (sleep (/ 1.0 30.0))))
 
@@ -218,8 +218,8 @@
   (let ((object (make-instance 'clgl:primitives))
         (du (/ (- u-max u-min) u-steps))
         (dv (/ (- v-max v-min) v-steps)))
-    (dotimes (i (1+ u-steps))
-      (dotimes (j (1+ v-steps))
+    (dotimes (i u-steps)
+      (dotimes (j v-steps)
         (let ((uv (+ u-min (* i du)))
               (vv (+ v-min (* j dv)))
               (nu (+ u-min (* (1+ i) du)))
@@ -230,8 +230,8 @@
                     filled))))
     object))
 
-(defun rotation-around-y (viewer &optional (radius 20) (frames 90))
-  (clgl:simple-animation (i frames)
+(defun rotation-around-y (viewer &optional (radius 20) (duration 2))
+  (clgl:simple-animation (i duration)
     (clgl:set-viewport
      viewer
      (make-instance

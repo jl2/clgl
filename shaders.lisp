@@ -47,11 +47,13 @@
     (gl:link-program program)
 
     (let ((status (gl:get-program program :link-status)))
-      (format t "link-program: ~a~%~a~%" status(gl:get-program-info-log program)))
+      (when (not (eq status t))
+        (format t "link-program: ~a~%~a~%" status (gl:get-program-info-log program))))
 
     (gl:validate-program program)
     (let ((status (gl:get-program program :validate-status)))
-      (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program)))))
+      (when (not (eq status t))
+        (format t "validate-program: ~a~%~a~%" status (gl:get-program-info-log program))))))
 
 
 (defun use-program (shader-program transformation viewport)

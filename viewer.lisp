@@ -58,13 +58,13 @@
 (defun viewer-thread-function (viewer)
   (with-init
     (let* ((monitor (glfw:get-primary-monitor))
-           ;; (cur-mode (glfw:get-video-mode monitor))
-           ;; (cur-width (getf cur-mode '%cl-glfw3:width))
-           ;; (cur-height (getf cur-mode '%cl-glfw3:height))
+           (cur-mode (glfw:get-video-mode monitor))
+           (cur-width (getf cur-mode '%cl-glfw3:width))
+           (cur-height (getf cur-mode '%cl-glfw3:height))
            )
       (with-window (:title "OpenGL Scene Viewer"
-                           :width 400
-                           :height 400
+                           :width (/ cur-width 2)
+                           :height cur-height
                            :decorated t
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile

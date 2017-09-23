@@ -145,7 +145,6 @@
        for ebo in ebos
        do
          (let ((gl-indices (to-gl-array indices :unsigned-int)))
-           (format t "Filling ebo ~a of vbo ~a with indices ~a~%" ebo (car vbos) indices)
            (gl:bind-buffer :element-array-buffer ebo)
            (gl:buffer-data :element-array-buffer :static-draw gl-indices)
            (gl:free-gl-array gl-indices)))
@@ -158,7 +157,6 @@
        for ebo in (cddr ebos)
        do
          (let ((gl-indices (to-gl-array indices :unsigned-int)))
-           (format t "Filling ebo ~a of vbo ~a with indices ~a~%" ebo (cadr vbos) indices)
            (gl:bind-buffer :element-array-buffer ebo)
            (gl:buffer-data :element-array-buffer :static-draw gl-indices)
            (gl:free-gl-array gl-indices)))))
@@ -167,24 +165,25 @@
   (call-next-method)
   (with-slots (vbos ebos transformation points lines triangles filled-triangles shader-programs) object
 
-    (gl:polygon-mode :front-and-back :line)
-    (gl:bind-buffer :array-buffer (car vbos))
-    
-    (use-program (car shader-programs) transformation viewport)
-
     (when (> (length points) 0)
+    (gl:polygon-mode :front-and-back :line)
+
+      (gl:bind-buffer :array-buffer (car vbos))
+      (use-program (car shader-programs) transformation viewport)
       (gl:bind-buffer :element-array-buffer (point-ebo ebos))
       (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
 
     (when (> (length lines) 0)
+      (gl:bind-buffer :array-buffer (car vbos))
+      (use-program (car shader-programs) transformation viewport)
       (gl:bind-buffer :element-array-buffer (line-ebo ebos))
       (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 
     (when (> (length triangles) 0)
       (gl:bind-buffer :array-buffer (cadr vbos))
       (use-program (cadr shader-programs) transformation viewport)
-      (gl:polygon-mode :front-and-back :line)
       (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
+      (gl:polygon-mode :front-and-back :line)
       (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length triangles)))
 
     (when (> (length filled-triangles) 0)

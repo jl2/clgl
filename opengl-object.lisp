@@ -25,7 +25,16 @@
                       :vertex (read-file
                                (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
                       :fragment(read-file
-                                (merge-pathnames *shader-dir* "default-fragment.glsl"))))
+                                (merge-pathnames *shader-dir* "default-fragment.glsl")))
+                     (make-instance
+                      'shader-program
+                      :inputs '(("position" . 3))
+
+                      :vertex (read-file
+                               (merge-pathnames *shader-dir* "black-fill-vertex.glsl"))
+                      :fragment(read-file
+                                (merge-pathnames *shader-dir* "black-fill-fragment.glsl")))
+                     )
                     :type (or null cons))
 
    (transformation :initform (meye 4) :type mat4))
@@ -37,19 +46,15 @@
 (defmethod fill-buffers ((object opengl-object))
   (with-slots (vao shader-programs) object
     (when (= 0 vao)
-      (setf vao (gl:gen-vertex-array))
-      (format t "Allocated vao: ~a~%" vao))
-    (format t "Binding vao ~a~%" vao)
+      (setf vao (gl:gen-vertex-array)))
     (gl:bind-vertex-array vao)
     (mapcar #'build-program shader-programs)))
 
 (defmethod fill-buffers :after ((object opengl-object))
-  (format t "Unbinding vertex array...~%")
   (gl:bind-vertex-array 0))
 
 (defmethod cleanup ((object opengl-object))
   (declare (ignorable object))
-  (format t "Cleaning up opengl-object: ~a~%" object)
   (with-slots (vao vbos ebos shader-programs) object
     (when (/= 0 vao)
       (when vbos
