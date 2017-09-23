@@ -25,16 +25,7 @@
                       :vertex (read-file
                                (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
                       :fragment(read-file
-                                (merge-pathnames *shader-dir* "default-fragment.glsl")))
-                     (make-instance
-                      'shader-program
-                      :inputs '(("position" . 3))
-
-                      :vertex (read-file
-                               (merge-pathnames *shader-dir* "black-fill-vertex.glsl"))
-                      :fragment(read-file
-                                (merge-pathnames *shader-dir* "black-fill-fragment.glsl")))
-                     )
+                                (merge-pathnames *shader-dir* "default-fragment.glsl"))))
                     :type (or null cons))
 
    (transformation :initform (meye 4) :type mat4))
