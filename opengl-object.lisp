@@ -13,19 +13,14 @@
                      (make-instance
                       'shader-program
                       :inputs '(("position" . 3) ("color" . 4))
-                      :vertex (read-file
-                               (merge-pathnames *shader-dir* "default-line-vertex.glsl"))
-                      :fragment(read-file
-                                (merge-pathnames *shader-dir* "default-fragment.glsl")))
+                      :vertex (read-file (merge-pathnames *shader-dir* "default-line-vertex.glsl"))
+                      :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))
 
                      (make-instance
                       'shader-program
                       :inputs '(("position" . 3) ("normal" . 3) ("color" . 4))
-
-                      :vertex (read-file
-                               (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
-                      :fragment(read-file
-                                (merge-pathnames *shader-dir* "default-fragment.glsl"))))
+                      :vertex (read-file (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
+                      :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl"))))
                     :type (or null cons))
 
    (transformation :initform (meye 4) :type mat4))

@@ -40,3 +40,17 @@
         (randr :min 0.25 :max 1.0)
         1.0f0))
 
+(defun point-on-sphere (radius)
+  (let ((theta (randr :min 0 :max pi))
+        (phi (randr :min 0 :max (* 2 pi))))
+    (vec3 (* radius (cos theta) (sin phi))
+          (* radius (sin theta) (sin phi))
+          (* radius (cos phi)))))
+
+(defun point-in-sphere (radius)
+  (let ((rradius (randr :min 0 :max radius))
+        (theta (randr :min 0 :max pi))
+        (phi (randr :min 0 :max (* 2 pi))))
+    (vec3 (* rradius (cos theta) (sin phi))
+          (* rradius (sin theta) (sin phi))
+          (* rradius (cos phi)))))

@@ -4,11 +4,9 @@
 
 (in-package #:clgl)
 
-(defun random-primitives (&key (points 0)
-                            (lines 0)
-                            (triangles 0))
-  (let ((prims (make-instance 'primitives)))
+(defun random-primitives (&key (points 0) (lines 0) (triangles 0))
 
+  (let ((prims (make-instance 'primitives)))
     (dotimes (i points)
       (add-point prims
                  (vec3 (randr) (randr) (randr))
@@ -29,12 +27,8 @@
     prims))
 
 
-(defun make-3d-axis (&key
-                       (increment (vec3 1 1 1))
-                       (lower (vec3 -1 -1 -1))
-                       (upper (vec3 1 1 1))
+(defun make-3d-axis (&key (lower (vec3 -1 -1 -1)) (upper (vec3 1 1 1))
                        (color (vec4 1.0 1.0 1.0 1.0)))
-  (declare (ignorable increment))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) color)
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) color)
@@ -79,15 +73,8 @@
       (clgl:add-line prims
                      (vec3 0.0 0.0 (- (/ i as-float)))
                      (vec3 0.0 (+ -1.0 (/ i as-float)) 0.0)
-                     (vec4 0.0 0.0 1.0 1.0))
-
-      ;; (clgl:add-line prims
-      ;;                (vec3 0.0 (/ i as-float) 0.0)
-      ;;                (vec3 (- 1.0 (/ i as-float)) 0.0 0.0)
-      ;;                (vec4 1.0 0.0 0.0 1.0))
-      )
+                     (vec4 0.0 0.0 1.0 1.0)))
     prims))
-
 
 (defun axis-viewer (&key (name 'object) (object nil) (show t) (in-thread nil))
   (let ((viewer (make-instance 'viewer :viewport (make-instance 'clgl:simple-viewport :distance 4))))
@@ -104,12 +91,12 @@
                   (min-t (- pi))
                   (max-t pi)
                   (steps 100)
-                  (color (vec4 1.0 1.0 1.0 1.0)))
+                  (color (vec4 0.0 1.0 0.0 1.0)))
   (let ((prims (make-instance 'primitives))
         (dt (/ (- max-t min-t) 1.0 steps)))
     (dotimes (i (1- steps))
       (let ((t-value (+ min-t (* dt i)))
-            (next-t-value (+ min-t (* dt i))))
+            (next-t-value (+ min-t (* dt (+ i 1)))))
         (add-line prims
                   (vec (funcall xf t-value)
                        (funcall yf t-value)

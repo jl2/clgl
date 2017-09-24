@@ -16,6 +16,9 @@
    #:look-at-viewport
    #:simple-viewport
 
+   #:point-in-sphere
+   #:point-on-sphere
+
    #:viewer
    #:show-viewer
    #:close-viewer

@@ -11,7 +11,7 @@
    (lines :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
    (triangles :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0))
    (filled-triangles :initform (make-array 0 :element-type 'fixnum :initial-contents '() :adjustable t :fill-pointer 0)))
-  (:documentation "A set of primitives that all use the same material."))
+  (:documentation "A set of primitives that all use the same shaders."))
 
 (defun point-ebo (ebos)
   (car ebos))
@@ -65,12 +65,12 @@
            (type color color))
   (with-slots (line-vertex-data lines) object
     (vector-push-extend (insert-pc-in-buffer line-vertex-data
-                                                pt1
-                                                color)
+                                             pt1
+                                             color)
                         lines)
     (vector-push-extend (insert-pc-in-buffer line-vertex-data
-                                                pt2
-                                                color)
+                                             pt2
+                                             color)
                         lines)))
 
 (defun triangle-normal (pt1 pt2 pt3)
@@ -110,19 +110,19 @@
   (let ((normal (triangle-normal pt1 pt2 pt3)))
     (with-slots (filled-vertex-data filled-triangles) object
       (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
-                                                  pt1
-                                                  normal
-                                                  color)
+                                                pt1
+                                                normal
+                                                color)
                           filled-triangles)
       (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
-                                                  pt2
-                                                  normal
-                                                  color)
+                                                pt2
+                                                normal
+                                                color)
                           filled-triangles)
       (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
-                                                  pt3
-                                                  normal
-                                                  color)
+                                                pt3
+                                                normal
+                                                color)
                           filled-triangles))))
 
 
@@ -160,13 +160,13 @@
            (gl:bind-buffer :element-array-buffer ebo)
            (gl:buffer-data :element-array-buffer :static-draw gl-indices)
            (gl:free-gl-array gl-indices)))))
-  
+
 (defmethod render ((object primitives) viewport)
   (call-next-method)
   (with-slots (vbos ebos transformation points lines triangles filled-triangles shader-programs) object
 
     (when (> (length points) 0)
-    (gl:polygon-mode :front-and-back :line)
+      (gl:polygon-mode :front-and-back :line)
 
       (gl:bind-buffer :array-buffer (car vbos))
       (use-program (car shader-programs) transformation viewport)
@@ -191,6 +191,4 @@
       (use-program (cadr shader-programs) transformation viewport)
       (gl:polygon-mode :front-and-back :fill)
       (gl:bind-buffer :element-array-buffer (filled-ebo ebos))
-      (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles)))
-    ))
-    
+      (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles)))))

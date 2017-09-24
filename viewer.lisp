@@ -13,7 +13,7 @@
    (should-close :initform nil)
    (to-cleanup :initform nil)
    (viewer-lock :initform (bt:make-lock "viewer-lock")))
-  (:documentation "A viewer."))
+  (:documentation "A viewport and a collection of objects."))
 
 (defmacro with-viewer-lock ((viewer) &body body)
   `(bt:with-lock-held ((slot-value ,viewer 'clgl::viewer-lock))
@@ -24,7 +24,7 @@
   (with-slots (objects viewport modified) viewer
     (gl:enable :line-smooth
                :polygon-smooth
-;;               :cull-face
+               :cull-face
                :depth-test :depth-clamp
                :blend)
     (gl:blend-func :one :one-minus-src-alpha)
@@ -59,8 +59,7 @@
     (let* ((monitor (glfw:get-primary-monitor))
            (cur-mode (glfw:get-video-mode monitor))
            (cur-width (getf cur-mode '%cl-glfw3:width))
-           (cur-height (getf cur-mode '%cl-glfw3:height))
-           )
+           (cur-height (getf cur-mode '%cl-glfw3:height)))
       (with-window (:title "OpenGL Scene Viewer"
                            :width (/ cur-width 2)
                            :height cur-height
@@ -123,22 +122,19 @@
   (with-viewer-lock (viewer)
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
-        (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))
-        ))))
+        (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))))))
 
 (defun translate-object (viewer object-name offset)
   (with-viewer-lock (viewer)
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
-        (nmtranslate (slot-value (cdr items) 'transformation) offset)
-        ))))
+        (nmtranslate (slot-value (cdr items) 'transformation) offset)))))
 
 (defun rotate-object (viewer object-name vector angle)
   (with-viewer-lock (viewer)
     (with-slots (objects modified) viewer
       (when-let ((items (assoc object-name objects)))
-        (nmrotate (slot-value (cdr items) 'transformation) vector angle)
-        ))))
+        (nmrotate (slot-value (cdr items) 'transformation) vector angle)))))
 
 (defun rm-object (viewer name)
   (with-viewer-lock (viewer)
@@ -146,8 +142,7 @@
       (when-let ((items (assoc name objects)))
         (push items to-cleanup)
         (setf objects (remove name objects :key #'car))
-        (setf modified t)
-        ))))
+        (setf modified t)))))
 
 (defun force-redraw (viewer)
   (with-viewer-lock (viewer)
