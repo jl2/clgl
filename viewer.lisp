@@ -27,7 +27,6 @@
 ;;               :cull-face
                :depth-test :depth-clamp
                :blend)
-    (gl:front-face :cw)
     (gl:blend-func :one :one-minus-src-alpha)
     (gl:clear-color 0.0 0.0 0.0 1.0)
     (gl:clear :color-buffer :depth-buffer)

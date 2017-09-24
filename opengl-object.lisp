@@ -61,8 +61,7 @@
 (defmethod render ((object opengl-object) viewport)
   (with-slots (vao transformation shader-programs) object
     (when (/= 0 vao)
-      (gl:bind-vertex-array vao)
-      (gl:depth-range -1000.0 1000.0))))
+      (gl:bind-vertex-array vao))))
 
 (defmethod render :after ((object opengl-object) viewport)
   (gl:bind-vertex-array 0))

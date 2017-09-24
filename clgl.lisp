@@ -181,27 +181,27 @@
                    (funcall yf uv nv)
                    (funcall zf uv nv))
 
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
              (vec3 (funcall xf uv vv)
                    (funcall yf uv vv)
                    (funcall zf uv vv))
 
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
              color)
 
     (funcall tri-function obj
-             (vec3 (funcall xf nu nv)
-                   (funcall yf nu nv)
-                   (funcall zf nu nv))
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
 
              (vec3 (funcall xf uv nv)
                    (funcall yf uv nv)
                    (funcall zf uv nv))
 
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
+             (vec3 (funcall xf nu nv)
+                   (funcall yf nu nv)
+                   (funcall zf nu nv))
 
              color)))
 
