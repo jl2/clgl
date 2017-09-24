@@ -7,9 +7,9 @@
 (defparameter *shader-dir* "~/src/lisp/clgl/shaders/")
 
 (defclass shader-program ()
-  ((layout :initarg :inputs :initform '( ("position" . 3) ("color" . 4)))
-   (vertex-text :initarg :vertex :initform (read-file (merge-pathnames *shader-dir* "default-line-vertex.glsl")))
-   (fragment-text :initarg :fragment :initform (read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))
+  ((layout :initarg :inputs)
+   (vertex-text :initarg :vertex)
+   (fragment-text :initarg :fragment)
    (vertex-shader :initform 0)
    (fragment-shader :initform 0)
    (program :initform nil)))
@@ -60,15 +60,18 @@
   (with-slots (layout program) shader-program
     (let* ((float-size   (cffi:foreign-type-size :float))
            (stride       (* (apply #'+ (mapcar #'cdr layout)) float-size)))
-      (loop for entry in layout
+      (loop for offset = 0 then (incf offset (cdr entry))
+         for entry in layout
          for count from 0
          do
            (let* ((attrib-name (car entry))
                   (attrib-size (cdr entry))
-                  (position-offset  (* count float-size))
+                  (position-offset offset)
                   (position-attrib (gl:get-attrib-location program attrib-name)))
-             (gl:enable-vertex-attrib-array position-attrib)
-             (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride position-offset))))
+             (when (>= position-attrib 0)
+               (gl:enable-vertex-attrib-array position-attrib)
+               (gl:vertex-attrib-pointer position-attrib attrib-size :float :false stride (* float-size position-offset))))))
+
     (gl:use-program program)
     (let ((xform-location (gl:get-uniform-location program "transformationMatrix"))
           (proj-location (gl:get-uniform-location program "projectionMatrix")))
