@@ -6,15 +6,15 @@
   (:use #:cl #:alexandria #:glfw #:3d-vectors #:3d-matrices)
 
   (:export
+
    #:viewport
-   #:orthographic
-   #:perspective
    #:get-transform-matrix
-   #:get-projection-matrix
+
    #:2d-viewport
-   #:spherical-viewport
    #:look-at-viewport
    #:simple-viewport
+   #:orthographic
+   #:perspective
 
    #:point-in-sphere
    #:point-on-sphere
@@ -24,9 +24,11 @@
    #:close-viewer
    #:add-object
    #:rm-object
-   #:force-redraw
    #:set-viewport
    #:clear
+
+   #:force-redraw
+
    #:scale-object
    #:translate-object
    #:rotate-object
@@ -36,25 +38,31 @@
    #:add-line
    #:add-triangle
    #:add-filled-triangle
-   #:make-3d-axis
 
    #:axis-viewer
+
    #:make-line-pattern
+   #:make-3d-axis
    #:random-primitives
 
    #:2d-plot
+   #:3d-plot
    #:xy-square
    #:xz-square
    #:yz-square
 
    #:rotation-around-y
+
    #:make-parametric
+
    #:sphere-x
    #:sphere-y
    #:sphere-z
+
    #:plane-x
    #:plane-y
    #:plane-z
+
    #:simple-animation
 
    #:get-matrix))

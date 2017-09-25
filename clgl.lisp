@@ -30,9 +30,9 @@
 (defun make-3d-axis (&key (lower (vec3 -1 -1 -1)) (upper (vec3 1 1 1))
                        (color (vec4 1.0 1.0 1.0 1.0)))
   (let* ((prims (make-instance 'clgl:primitives)))
-    (clgl:add-line prims (vx__ lower) (vx__ upper) color)
-    (clgl:add-line prims (v_y_ lower) (v_y_ upper) color)
-    (clgl:add-line prims (v__z lower) (v__z upper) color)
+    (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
+    (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 1 0 1))
+    (clgl:add-line prims (v__z lower) (v__z upper) (vec4 0 0 1 1))
     prims))
 
 (defun make-line-pattern (count)
@@ -104,6 +104,29 @@
                   (vec (funcall xf next-t-value)
                        (funcall yf next-t-value)
                        0)
+                  color)))
+    prims))
+
+(defun 3d-plot (&key
+                  (yf #'sin)
+                  (xf #'identity)
+                  (zf #'cos)
+                  (min-t (- pi))
+                  (max-t pi)
+                  (steps 100)
+                  (color (vec4 0.0 1.0 0.0 1.0)))
+  (let ((prims (make-instance 'primitives))
+        (dt (/ (- max-t min-t) 1.0 steps)))
+    (dotimes (i (1- steps))
+      (let ((t-value (+ min-t (* dt i)))
+            (next-t-value (+ min-t (* dt (+ i 1)))))
+        (add-line prims
+                  (vec (funcall xf t-value)
+                       (funcall yf t-value)
+                       (funcall zf t-value))
+                  (vec (funcall xf next-t-value)
+                       (funcall yf next-t-value)
+                       (funcall zf next-t-value))
                   color)))
     prims))
 
@@ -221,10 +244,8 @@
   (clgl:simple-animation (i duration)
     (clgl:set-viewport
      viewer
-     (make-instance
-      'clgl:simple-viewport 
-      :projection (make-instance 'clgl:perspective
-                                 :near 1
-                                 :far 200
-                                 :fovy 50)))))
+     (make-instance 'clgl:look-at-viewport :up +vy+
+      :eye (vec3 (* radius (cos (* i (/ pi 180))))
+                 (/ radius 2)
+                 (* radius (sin (* i (/ pi 180)))))))))
 

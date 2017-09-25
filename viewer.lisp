@@ -27,6 +27,7 @@
                :cull-face
                :depth-test :depth-clamp
                :blend)
+    (gl:depth-range -1.1 1.1)
     (gl:blend-func :one :one-minus-src-alpha)
     (gl:clear-color 0.0 0.0 0.0 1.0)
     (gl:clear :color-buffer :depth-buffer)

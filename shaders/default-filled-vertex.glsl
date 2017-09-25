@@ -5,7 +5,6 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 color;
 
 uniform mat4 transformationMatrix;
-uniform mat4 projectionMatrix;
 
 out vec4 Color;
 
@@ -16,5 +15,5 @@ void main()
 
     Color = color * max(0.2, dot(L, transpose(inverse(transformationMatrix)) * vec4(normal, 1.0)));
     gl_PointSize = 1.0;
-    gl_Position = projectionMatrix * transformedPosition;
+    gl_Position = transformedPosition;
 }
