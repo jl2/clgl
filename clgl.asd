@@ -12,7 +12,8 @@
                #:bordeaux-threads
                #:trivial-main-thread
                #:3d-vectors
-               #:3d-matrices)
+               #:3d-matrices
+               #:stl)
   :serial t
   :components ((:file "package")
                (:file "clgl")
@@ -22,5 +23,6 @@
                (:file "viewer")
                (:file "viewport")
                (:file "transformation")
+               (:file "stl-file")
                (:file "utilities")))
 

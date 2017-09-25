@@ -1,6 +1,6 @@
-;;;; opengl-object.lisp
+;;;; transformation.lisp
 ;;;;
-;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah.larocco@gmail.com>
+;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 (in-package #:clgl)
 
