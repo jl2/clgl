@@ -15,6 +15,7 @@
    #:simple-viewport
    #:orthographic
    #:perspective
+   #:rotating-viewport
 
    #:point-in-sphere
    #:point-on-sphere

@@ -7,6 +7,12 @@
 (defclass viewport ()
   ())
 
+(defgeneric handle-mouse-drag (view x-diff y-diff))
+(defmethod handle-mouse-drag (view x-diff y-diff))
+
+(defgeneric handle-scroll (view amount))
+(defmethod handle-scroll (view amount))
+
 (defgeneric get-transform-matrix (view))
 (defmethod get-transform-matrix (view)
   (meye 4))
@@ -16,7 +22,7 @@
 
 (defmethod get-transform-matrix ((view 2d-viewport))
   (with-slots (radius) view
-    (let ((nradisu (- radius)))
+    (let ((nradius (- radius)))
       (mortho nradius radius
               nradius radius
               nradius radius))))
@@ -33,6 +39,30 @@
           (return-value (mlookat center eye up)))
       (m* (mscaling (vec3 ilen ilen ilen)) return-value))))
 
+(defclass rotating-viewport (viewport)
+  ((radius :initform 10.0 :initarg :radius)
+   (theta :initform 0.0)
+   (phi :initform 0.0)))
+
+(defmethod get-transform-matrix ((view rotating-viewport))
+  (with-slots (radius theta phi) view
+    (let ((ir (if (< (abs radius) 0.00001f0) 1.0 (/ 1.0 radius))))
+      (m*
+       (mscaling (vec3 ir ir ir))
+       (mtranslation (vec3 0 (- radius) 0))
+       (mrotation +vx+ theta)
+       (mrotation +vy+ phi)
+       
+       ))))
+
+(defmethod handle-scroll ((view rotating-viewport) amount)
+  (with-slots (radius) view
+    (incf radius amount)))
+
+(defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
+  (with-slots (theta phi) view
+    (incf theta y-diff)
+    (incf phi x-diff)))
 
 (defclass simple-viewport (viewport)
   ((distance :initform 10 :initarg :distance)))

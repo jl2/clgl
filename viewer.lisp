@@ -34,8 +34,25 @@
     (dolist (object objects)
       (render (cdr object) viewport))))
 
+(defparameter *click-position* nil)
+(defparameter *last-position* nil)
+(defparameter *scrolling* nil)
+
 (defun check-for-state-changes (viewer)
-  (with-slots (objects to-cleanup modified should-close) viewer
+  (with-slots (objects to-cleanup modified should-close viewport) viewer
+    (when *scrolling*
+      (handle-scroll viewport (* 0.25 (cdr *scrolling*)))
+      (setf *scrolling* nil))
+
+    (when *click-position*
+      (let* ((new-point (glfw:get-cursor-position))
+             (win-size (glfw:get-window-size))
+             (x-diff (/ (- (car new-point) (car *click-position*)) (car win-size)))
+             (y-diff (/ (- (cadr new-point) (cadr *click-position*)) (cadr win-size))))
+        (when (not (equal new-point *last-position*))
+          (setf *last-position* new-point)
+          (handle-mouse-drag viewport (* -1 (/ pi 32) x-diff) (* (/ pi 32) pi y-diff)))))
+
     (when modified
       (dolist (object objects)
         (fill-buffers (cdr object)))
@@ -52,8 +69,30 @@
 
 (def-key-callback quit-on-escape (window key scancode action mod-keys)
   (declare (ignore window scancode mod-keys))
-  (when (and (eq key :escape) (eq action :press))
-    (set-window-should-close)))
+  (cond ((and (eq key :escape) (eq action :press) *click-position*)
+         (setf *click-position* nil)
+         (setf *last-position* nil))
+        ((and (eq key :escape) (eq action :press))
+         (set-window-should-close))))
+
+(def-mouse-button-callback mouse-handler (window button action mod-keys)
+  (declare (ignorable mod-keys))
+  (let ((cpos (glfw:get-cursor-position window)))
+
+    (when (and (eq button :left) (eq action :press) (null *click-position*))
+      (setf *click-position* cpos)
+      (setf *last-position* cpos))
+
+    (when (and (eq button :left) (eq action :release) *click-position*)
+      (setf *last-position* nil)
+      (setf *click-position* nil))))
+
+(def-scroll-callback scroll-handler (window x y)
+  (declare (ignorable window))
+  (setf *scrolling* (cons x y)))
+
+(def-error-callback error-callback (message)
+  (format t "Error: ~a~%" message))
 
 (defun viewer-thread-function (viewer)
   (with-init
@@ -71,9 +110,11 @@
                            :context-version-minor 3
                            :opengl-forward-compat t
                            :resizable t)
-
         (setf %gl:*gl-get-proc-address* #'get-proc-address)
         (set-key-callback 'quit-on-escape)
+        (set-error-callback 'error-callback)
+        (set-mouse-button-callback 'mouse-handler)
+        (set-scroll-callback 'scroll-handler)
         (gl:clear-color 0 0 0 1.0)
 
         (with-viewer-lock (viewer)
