@@ -47,11 +47,11 @@
     (when *click-position*
       (let* ((new-point (glfw:get-cursor-position))
              (win-size (glfw:get-window-size))
-             (x-diff (/ (- (car new-point) (car *click-position*)) (car win-size)))
-             (y-diff (/ (- (cadr new-point) (cadr *click-position*)) (cadr win-size))))
+             (x-diff (/ (- (car new-point) (car *last-position*)) (car win-size)))
+             (y-diff (/ (- (cadr new-point) (cadr *last-position*)) (cadr win-size))))
         (when (not (equal new-point *last-position*))
           (setf *last-position* new-point)
-          (handle-mouse-drag viewport (* -1 (/ pi 8) x-diff) (* (/ pi 8) pi y-diff)))))
+          (handle-mouse-drag viewport x-diff y-diff))))
 
     (when modified
       (dolist (object objects)

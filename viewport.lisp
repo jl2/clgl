@@ -18,15 +18,33 @@
   (meye 4))
 
 (defclass 2d-viewport (viewport)
-  ((radius :initarg :radius :initform 10.0)))
+  ((radius :initarg :radius :initform 10.0)
+   (center :initarg :center :initform (vec3 0 0 0))))
+
+(defmethod handle-scroll ((view 2d-viewport) amount)
+  (with-slots (radius) view
+    (setf radius (clamp (- radius amount) 2.0 1000.0))))
+
+(defmethod handle-mouse-drag ((view 2d-viewport) x-diff y-diff)
+  (with-slots (radius center) view
+    (setf center (vec3 (clamp (- (vx center) (* 8 radius x-diff)) -1000.0 1000.0)
+                       (clamp (+ (vy center) (* 8 radius y-diff)) -1000.0 1000.0)
+                       0.0
+                       ))))
 
 (defmethod get-transform-matrix ((view 2d-viewport))
-  (with-slots (radius) view
-    (let ((nradius (- radius)))
-      (mortho nradius radius
-              nradius radius
-              nradius radius))))
-
+  (with-slots (radius center) view
+    (let ((nradius (- radius))
+          (ir (/ 1.0 radius)))
+      (m*
+       
+       (mscaling (vec3 ir ir 0.0))
+       (mortho nradius radius
+               nradius radius
+               nradius radius)
+       (mtranslation (vec3 (- (vx center))
+                           (- (vy center))
+                           (- (vz center))))))))
 
 (defclass look-at-viewport (viewport)
   ((eye :initarg :eye :initform (vec3 16.0f0 16.0f0 16.0f0))
@@ -64,8 +82,8 @@
 
 (defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
   (with-slots (theta phi) view
-    (setf theta (clamp (+ theta  y-diff) (- pi) pi))
-    (setf phi (clamp (- phi  x-diff) (- pi) pi))))
+    (setf theta (clamp (+ theta  y-diff) (* -4 pi) (* 4 pi)))
+    (setf phi (clamp (- phi  x-diff) (* -4 pi) (* 4 pi)))))
 
 (defclass simple-viewport (viewport)
   ((distance :initform 10 :initarg :distance)))

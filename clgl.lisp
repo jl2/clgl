@@ -27,12 +27,17 @@
     prims))
 
 
-(defun make-3d-axis (&key (lower (vec3 -1 -1 -1)) (upper (vec3 1 1 1))
-                       (color (vec4 1.0 1.0 1.0 1.0)))
+(defun make-3d-axis (&key (lower (vec3 -1 -1 -1)) (upper (vec3 1 1 1)))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 1 0 1))
     (clgl:add-line prims (v__z lower) (v__z upper) (vec4 0 0 1 1))
+    prims))
+
+(defun make-2d-axis (&key (lower (vec3 -1 -1 0)) (upper (vec3 1 1 0)))
+  (let* ((prims (make-instance 'clgl:primitives)))
+    (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
+    (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 0 1 1))
     prims))
 
 (defun make-line-pattern (count)
@@ -248,3 +253,11 @@
       :eye (vec3 (* radius (cos (* i (/ pi 180))))
                  (/ radius 2)
                  (* radius (sin (* i (/ pi 180)))))))))
+
+(defun plotter (&optional (in-thread nil))
+  (let ((viewer (make-instance 'clgl:viewer :viewport (make-instance 'clgl:2d-viewport))))
+    (add-object viewer 'axis (make-2d-axis))
+    (add-object viewer 'plot (2d-plot :xf (lambda (tv) (* 3.0 (cos (* 4 tv)) (sin tv)))
+                                      :yf (lambda (tv) (* 3.0 (cos (* 4 tv)) (cos tv)))))
+    (show-viewer viewer in-thread)
+    viewer))

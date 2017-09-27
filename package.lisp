@@ -46,10 +46,12 @@
 
    #:make-line-pattern
    #:make-3d-axis
+   #:make-2d-axis
    #:random-primitives
 
    #:2d-plot
    #:3d-plot
+   #:plotter
    #:xy-square
    #:xz-square
    #:yz-square
