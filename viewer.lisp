@@ -27,7 +27,7 @@
                :cull-face
                :depth-test :depth-clamp
                :blend)
-    (gl:depth-range -1.1 1.1)
+    (gl:depth-range -10.1 10.1)
     (gl:blend-func :one :one-minus-src-alpha)
     (gl:clear-color 0.0 0.0 0.0 1.0)
     (gl:clear :color-buffer :depth-buffer)
@@ -51,7 +51,7 @@
              (y-diff (/ (- (cadr new-point) (cadr *click-position*)) (cadr win-size))))
         (when (not (equal new-point *last-position*))
           (setf *last-position* new-point)
-          (handle-mouse-drag viewport (* -1 (/ pi 32) x-diff) (* (/ pi 32) pi y-diff)))))
+          (handle-mouse-drag viewport (* -1 (/ pi 8) x-diff) (* (/ pi 8) pi y-diff)))))
 
     (when modified
       (dolist (object objects)

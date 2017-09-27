@@ -46,23 +46,26 @@
 
 (defmethod get-transform-matrix ((view rotating-viewport))
   (with-slots (radius theta phi) view
-    (let ((ir (if (< (abs radius) 0.00001f0) 1.0 (/ 1.0 radius))))
+    (let ((ir (if (< (abs radius) 0.00001f0) 1.0 (/ 1.0 radius)))
+          (min-val (- radius))
+          (max-val radius))
       (m*
        (mscaling (vec3 ir ir ir))
-       (mtranslation (vec3 0 (- radius) 0))
-       (mrotation +vx+ theta)
+       (mortho min-val max-val min-val max-val min-val max-val)
        (mrotation +vy+ phi)
-       
-       ))))
+       (mrotation +vx+ theta)
+       (mtranslation (vec3 0 0 (- radius)))))))
 
 (defmethod handle-scroll ((view rotating-viewport) amount)
   (with-slots (radius) view
-    (incf radius amount)))
+    (incf radius (- amount))
+    (when (< radius 2.0)
+      (setf radius 2.0))))
 
 (defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
   (with-slots (theta phi) view
-    (incf theta y-diff)
-    (incf phi x-diff)))
+    (setf theta (clamp (+ theta  y-diff) (- pi) pi))
+    (setf phi (clamp (- phi  x-diff) (- pi) pi))))
 
 (defclass simple-viewport (viewport)
   ((distance :initform 10 :initarg :distance)))
