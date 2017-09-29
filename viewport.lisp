@@ -69,16 +69,15 @@
           (max-val radius))
       (m*
        (mscaling (vec3 ir ir ir))
+       (mtranslation (vec3 0 0 (- radius)))
        (mortho min-val max-val min-val max-val min-val max-val)
        (mrotation +vy+ phi)
        (mrotation +vx+ theta)
-       (mtranslation (vec3 0 0 (- radius)))))))
+       ))))
 
 (defmethod handle-scroll ((view rotating-viewport) amount)
   (with-slots (radius) view
-    (incf radius (- amount))
-    (when (< radius 2.0)
-      (setf radius 2.0))))
+    (setf radius (clamp (* (- 1.0 (* amount 0.5)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
   (with-slots (theta phi) view

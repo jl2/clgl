@@ -102,7 +102,7 @@
            (cur-height (getf cur-mode '%cl-glfw3:height)))
       (with-window (:title "OpenGL Scene Viewer"
                            :width (/ cur-width 2)
-                           :height cur-height
+                           :height (/ cur-height 2)
                            :decorated t
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile
