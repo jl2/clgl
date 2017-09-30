@@ -23,12 +23,12 @@
 
 (defmethod handle-scroll ((view 2d-viewport) amount)
   (with-slots (radius) view
-    (setf radius (clamp (- radius amount) 2.0 1000.0))))
+    (setf radius (clamp (* (- 1.0 (* amount 0.5)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view 2d-viewport) x-diff y-diff)
   (with-slots (radius center) view
-    (setf center (vec3 (clamp (- (vx center) (* 8 radius x-diff)) -1000.0 1000.0)
-                       (clamp (+ (vy center) (* 8 radius y-diff)) -1000.0 1000.0)
+    (setf center (vec3 (clamp (- (vx center) (* x-diff radius)) -1000.0 1000.0)
+                       (clamp (+ (vy center) (* y-diff radius)) -1000.0 1000.0)
                        0.0
                        ))))
 

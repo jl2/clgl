@@ -70,5 +70,6 @@
 
    #:simple-animation
 
+   #:gpx-heatmap
    #:get-matrix))
 

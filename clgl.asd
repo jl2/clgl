@@ -13,6 +13,7 @@
                #:trivial-main-thread
                #:3d-vectors
                #:3d-matrices
+               #:gpxtools
                #:stl)
   :serial t
   :components ((:file "package")

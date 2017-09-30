@@ -261,3 +261,41 @@
                                       :yf (lambda (tv) (* 3.0 (cos (* 4 tv)) (cos tv)))))
     (show-viewer viewer in-thread)
     viewer))
+
+(defun bounding-box (points)
+  (loop for pt in points
+     minimizing (gpxtools:gpx-pt-lat pt) into min-lat
+     maximizing (gpxtools:gpx-pt-lat pt) into max-lat
+     minimizing (gpxtools:gpx-pt-lon pt) into min-lon
+     maximizing (gpxtools:gpx-pt-lon pt) into max-lon
+     minimizing (gpxtools:gpx-pt-ele pt) into min-ele
+     maximizing (gpxtools:gpx-pt-ele pt) into max-ele
+     finally (return (values min-lat max-lat min-lon max-lon min-ele max-ele))))
+
+(defun map-value (val min-val max-val)
+  (- (* 2 (/ (- val min-val) (- max-val min-val))) 1.0))
+
+(defun map-pt (lat lon ele min-lat max-lat min-lon max-lon min-ele max-ele)
+  (let ((lat (map-value lat min-lat max-lat))
+        (lon (map-value lon min-lon max-lon))
+        (ele (map-value ele min-ele max-ele)))
+    (values lat lon ele)))
+
+(defun gpx-heatmap (directory)
+  (let* ((gpx-pts (make-instance 'primitives))
+         (files (directory (format nil "~a/*.gpx" directory)))
+         (all-points (apply (curry #'concatenate 'list) (mapcar (compose #'gpxtools:collect-points #'gpxtools:read-gpx) files))))
+    (multiple-value-bind (min-lat max-lat min-lon max-lon min-ele max-ele) (bounding-box all-points)
+      (dolist (gpt all-points)
+        (multiple-value-bind (y-value x-value z-value) (map-pt (gpxtools:gpx-pt-lat gpt)
+                                                               (gpxtools:gpx-pt-lon gpt)
+                                                               (gpxtools:gpx-pt-ele gpt)
+                                                               min-lat max-lat
+                                                               min-lon max-lon
+                                                               min-ele max-ele)
+          (add-point gpx-pts (vec3
+                              x-value
+                              y-value
+                              z-value)
+                     (vec4 0 1 0 0.25)))))
+    gpx-pts))
