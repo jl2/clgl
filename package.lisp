@@ -25,6 +25,7 @@
    #:close-viewer
    #:add-object
    #:rm-object
+   #:recompile-shaders
    #:set-viewport
    #:clear
 

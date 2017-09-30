@@ -9,7 +9,7 @@ out vec4 Color;
 
 void main()
 {
-    Color = color;
-    gl_PointSize = 1.0;
+    Color = color + vec4(0, 0, position.z, 1.0);
+    gl_PointSize = 2.250;
     gl_Position = transformationMatrix * vec4(position, 1.0);
 }

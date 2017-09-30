@@ -29,12 +29,19 @@
 (defgeneric fill-buffers (object))
 (defgeneric render (object viewport))
 
+(defgeneric rebuild-shaders (object))
+(defmethod rebuild-shaders ((object opengl-object))
+  (with-slots (vao shader-programs) object
+    (when vao
+      (gl:bind-vertex-array vao)
+      (mapcar #'build-program shader-programs))))
+
 (defmethod fill-buffers ((object opengl-object))
   (with-slots (vao shader-programs) object
     (when (= 0 vao)
       (setf vao (gl:gen-vertex-array)))
     (gl:bind-vertex-array vao)
-    (mapcar #'build-program shader-programs)))
+    (rebuild-shaders object)))
 
 (defmethod fill-buffers :after ((object opengl-object))
   (gl:bind-vertex-array 0))

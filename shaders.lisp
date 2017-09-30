@@ -28,20 +28,28 @@
     (setf fragment-shader 0)
     (setf program 0)))
 
-(defun compile-shader (type text)
-  (let ((shader (gl:create-shader type)))
-    (gl:shader-source shader text)
-    (gl:compile-shader shader)
-    (when (not (eq t (gl:get-shader shader :compile-status)))
-      (format t "compile-status: ~a~%" (gl:get-shader shader :compile-status))
-      (format t "info-log ~a~%" (gl:get-shader-info-log shader)))
-    shader))
+(defun compile-shader (shader text)
+  (format t "Recompiling ~a~%" text)
+  (gl:shader-source shader text)
+  (gl:compile-shader shader)
+  (when (not (eq t (gl:get-shader shader :compile-status)))
+    (format t "compile-status: ~a~%" (gl:get-shader shader :compile-status))
+    (format t "info-log ~a~%" (gl:get-shader-info-log shader))))
 
 (defun build-program (program)
   (with-slots (vertex-text fragment-text vertex-shader fragment-shader program) program
-    (setf vertex-shader (compile-shader :vertex-shader vertex-text))
-    (setf fragment-shader (compile-shader :fragment-shader fragment-text))
-    (setf program (gl:create-program))
+
+    (when (zerop vertex-shader)
+      (setf vertex-shader (gl:create-shader :vertex-shader)))
+    (compile-shader vertex-shader vertex-text)
+
+    (when (zerop fragment-shader)
+      (setf fragment-shader (gl:create-shader :fragment-shader)))
+    (compile-shader fragment-shader fragment-text)
+
+    (when (zerop program)
+      (setf program (gl:create-program)))
+
     (gl:attach-shader program vertex-shader)
     (gl:attach-shader program fragment-shader)
     (gl:link-program program)

@@ -186,6 +186,16 @@
         (setf objects (remove name objects :key #'car))
         (setf modified t)))))
 
+(defun recompile-shaders (viewer name)
+  (with-viewer-lock (viewer)
+    (with-slots (objects to-cleanup modified) viewer
+      (if-let ((items (assoc name objects)))
+        (progn 
+          (format t "Rebuilding shader for ~a~%" items)
+          (rebuild-shaders (cdr items)))
+        (progn 
+          (format t "Could not find shader for ~a~%" name))))))
+
 (defun force-redraw (viewer)
   (with-viewer-lock (viewer)
     (setf (slot-value viewer 'clgl::modified) t)))
