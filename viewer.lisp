@@ -7,21 +7,33 @@
 (defclass viewer ()
   ((objects :initform nil :type (or null cons))
    (viewport :initarg :viewport :initform (make-instance 'look-at-viewport))
-   (ticker-callback :initform nil)
-   (modified :initform t)
-   (window-open :initform nil)
-   (should-close :initform nil)
+
+   (to-refill :initform t)
+   (to-recompile :initform t)
    (to-cleanup :initform nil)
-   (viewer-lock :initform (bt:make-lock "viewer-lock")))
+
+   (viewer-lock :initform (bt:make-lock "viewer-lock"))
+   (window :initform nil)
+
+   (first-click-position :initform nil)
+   (last-mouse-position :initform nil)
+   (should-close :initform nil))
   (:documentation "A viewport and a collection of objects."))
 
 (defmacro with-viewer-lock ((viewer) &body body)
   `(bt:with-lock-held ((slot-value ,viewer 'clgl::viewer-lock))
      ,@body))
 
-(defmethod render ((viewer viewer) viewport)
-  (declare (ignorable viewport))
-  (with-slots (objects viewport modified) viewer
+(defgeneric view-key-press (viewer window key scancode action mod-keys))
+(defgeneric view-mouse-button (viewer window button action mod-keys))
+(defgeneric view-scroll (viewer window x y))
+(defgeneric view-idle (viewer window))
+
+(defparameter *global-viewer* nil)
+
+(defmethod render ((viewer viewer) window)
+  (declare (ignorable viewer window))
+  (with-slots (objects viewport) viewer
     (gl:enable :line-smooth
                :polygon-smooth
                :cull-face
@@ -34,62 +46,84 @@
     (dolist (object objects)
       (render (cdr object) viewport))))
 
-(defparameter *click-position* nil)
-(defparameter *last-position* nil)
-(defparameter *scrolling* nil)
+(defmethod view-idle ((viewer viewer) window)
+  (declare (ignorable viewer window))
+  (with-slots (last-position first-click-position should-close objects to-cleanup to-refill to-recompile should-close viewport) viewer
 
-(defun check-for-state-changes (viewer)
-  (with-slots (objects to-cleanup modified should-close viewport) viewer
-    (when *scrolling*
-      (handle-scroll viewport (* 0.25 (cdr *scrolling*)))
-      (setf *scrolling* nil))
-
-    (when *click-position*
+    (when first-click-position
       (let* ((new-point (glfw:get-cursor-position))
              (win-size (glfw:get-window-size))
-             (x-diff (/ (- (car new-point) (car *last-position*)) (car win-size)))
-             (y-diff (/ (- (cadr new-point) (cadr *last-position*)) (cadr win-size))))
-        (when (not (equal new-point *last-position*))
-          (setf *last-position* new-point)
+             (x-diff (/ (- (car new-point) (car last-position)) (car win-size)))
+             (y-diff (/ (- (cadr new-point) (cadr last-position)) (cadr win-size))))
+        (when (not (equal new-point last-position))
+          (setf last-position new-point)
           (handle-mouse-drag viewport x-diff y-diff))))
 
-    (when modified
-      (dolist (object objects)
-        (fill-buffers (cdr object)))
-      (setf modified nil))
+    (dolist (object to-refill)
+      (fill-buffers (cdr object)))
+    (setf to-refill nil)
 
-    (when to-cleanup
-      (dolist (object to-cleanup)
-        (cleanup (cdr object)))
-      (setf to-cleanup nil))
+    (dolist (object to-recompile)
+      (rebuild-shaders (cdr object)))
+    (setf to-recompile nil)
 
+    (dolist (object to-cleanup)
+      (cleanup (cdr object)))
+    (setf to-cleanup nil)
     (when should-close
-      (set (slot-value viewer 'window-open) nil)
-      (set-window-should-close))))
+      (set-window-should-close window))))
+
+(defmethod view-key-press ((viewer viewer) window key scancode action mod-keys)
+  (declare (ignorable window key scancode action mod-keys))
+  (with-slots (last-position first-click-position objects to-cleanup geometry-modified should-close viewport) viewer
+    (cond ((and (eq key :escape) (eq action :press) click-position)
+           (setf click-position nil)
+           (setf last-position nil))
+          ((and (eq key :escape) (eq action :press))
+           (set-window-should-close window)))))
+
+(defmethod view-mouse-button ((viewer viewer) window button action mod-keys)
+  (declare (ignorable window button action mod-keys))
+  (with-slots (last-position first-click-position objects to-cleanup geometry-modified should-close viewport) viewer
+    (let ((cpos (glfw:get-cursor-position window)))
+      (cond ((and (eq button :left) (eq action :press) (null first-click-position))
+             (setf first-click-position cpos)
+             (setf last-position cpos))
+
+            (first-click-position
+             (let* ((new-point (glfw:get-cursor-position window))
+                    (win-size (glfw:get-window-size window))
+                    (x-diff (/ (- (car new-point) (car last-position)) (car win-size)))
+                    (y-diff (/ (- (cadr new-point) (cadr last-position)) (cadr win-size))))
+               (when (not (equal new-point last-position))
+                 (setf last-position new-point)
+                 (handle-mouse-drag viewport x-diff y-diff))))
+            ((and (eq button :left) (eq action :release) first-click-position)
+             (setf last-position nil)
+             (setf first-click-position nil))))))
+
+(defmethod  view-scroll ((viewer viewer) window x y)
+  (declare (ignorable window x y))
+  (with-slots (viewport) viewer
+    (handle-scroll viewport (* 0.25 y))))
+
+
+(def-key-callback to-global-keyboard (window key scancode action mod-keys)
+  (when *global-viewer*
+    (view-keyboard *global-viewer* window key scancode action mod-keys)))
+
+(def-mouse-button-callback to-global-mouse (window button action mod-keys)
+  (when *global-viewer*
+    (view-mouse-button *global-viewer* window button action mod-keys)))
 
 (def-key-callback quit-on-escape (window key scancode action mod-keys)
   (declare (ignore window scancode mod-keys))
-  (cond ((and (eq key :escape) (eq action :press) *click-position*)
-         (setf *click-position* nil)
-         (setf *last-position* nil))
-        ((and (eq key :escape) (eq action :press))
-         (set-window-should-close))))
-
-(def-mouse-button-callback mouse-handler (window button action mod-keys)
-  (declare (ignorable mod-keys))
-  (let ((cpos (glfw:get-cursor-position window)))
-
-    (when (and (eq button :left) (eq action :press) (null *click-position*))
-      (setf *click-position* cpos)
-      (setf *last-position* cpos))
-
-    (when (and (eq button :left) (eq action :release) *click-position*)
-      (setf *last-position* nil)
-      (setf *click-position* nil))))
+  (when *global-viewer*
+    (view-keyboard *global-viewer* window key scancode action mod-keys)))
 
 (def-scroll-callback scroll-handler (window x y)
-  (declare (ignorable window))
-  (setf *scrolling* (cons x y)))
+  (when *global-viewer*
+    (handle-scroll *global-viewer* window x y)))
 
 (def-error-callback error-callback (message)
   (format t "Error: ~a~%" message))
@@ -117,23 +151,11 @@
         (set-scroll-callback 'scroll-handler)
         (gl:clear-color 0 0 0 1.0)
 
-        (with-viewer-lock (viewer)
-          (with-slots (should-close window-open) viewer
-            (setf should-close nil)
-            (setf window-open t)))
-
-        ;; The 'event loop'
         (loop until (window-should-close-p)
-           do
-             (with-viewer-lock (viewer)
-               (check-for-state-changes viewer)
-               (render viewer nil))
+           do (view-idle viewer window)
+           do (render viewer window)
            do (swap-buffers)
-           do (poll-events))
-        (with-viewer-lock (viewer)
-          (with-slots (objects) viewer
-            (dolist (object objects)
-              (cleanup (cdr object)))))))))
+           do (poll-events))))))
 
 (defun show-viewer (viewer &optional (in-thread nil))
   (if in-thread
@@ -143,52 +165,52 @@
 
 (defun set-viewport (viewer new-viewport)
   (with-viewer-lock (viewer)
-    (with-slots (viewport modified) viewer
+    (with-slots (viewport) viewer
       (setf viewport new-viewport))))
 
 (defun close-viewer (viewer)
   (with-viewer-lock (viewer)
-    (with-slots (window-open should-close) viewer
-      (when window-open
+    (with-slots (window should-close) viewer
+      (when (not (zerop window))
         (set should-close t)))))
 
 (defun add-object (viewer name object)
   (with-viewer-lock (viewer)
-    (with-slots (objects modified) viewer
+    (with-slots (objects) viewer
       (if-let ((item (assoc name objects)))
         (setf (cdr item) object)
         (push (cons name object) objects))
-      (setf modified t))))
+      (setf geometry-modified t))))
 
 (defun scale-object (viewer object-name scale)
   (with-viewer-lock (viewer)
-    (with-slots (objects modified) viewer
+    (with-slots (objects geometry-modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))))))
 
 (defun translate-object (viewer object-name offset)
   (with-viewer-lock (viewer)
-    (with-slots (objects modified) viewer
+    (with-slots (objects geometry-modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmtranslate (slot-value (cdr items) 'transformation) offset)))))
 
 (defun rotate-object (viewer object-name vector angle)
   (with-viewer-lock (viewer)
-    (with-slots (objects modified) viewer
+    (with-slots (objects geometry-modified) viewer
       (when-let ((items (assoc object-name objects)))
         (nmrotate (slot-value (cdr items) 'transformation) vector angle)))))
 
 (defun rm-object (viewer name)
   (with-viewer-lock (viewer)
-    (with-slots (objects to-cleanup modified) viewer
+    (with-slots (objects to-cleanup geometry-modified) viewer
       (when-let ((items (assoc name objects)))
         (push items to-cleanup)
         (setf objects (remove name objects :key #'car))
-        (setf modified t)))))
+        (setf geometry-modified t)))))
 
 (defun recompile-shaders (viewer name)
   (with-viewer-lock (viewer)
-    (with-slots (objects to-cleanup modified) viewer
+    (with-slots (objects geometry-modified) viewer
       (if-let ((items (assoc name objects)))
         (progn 
           (format t "Rebuilding shader for ~a~%" items)
@@ -196,14 +218,9 @@
         (progn 
           (format t "Could not find shader for ~a~%" name))))))
 
-(defun force-redraw (viewer)
-  (with-viewer-lock (viewer)
-    (setf (slot-value viewer 'clgl::modified) t)))
-
 (defun clear (viewer)
   (with-viewer-lock (viewer)
-    (with-slots (objects to-cleanup modified) viewer
+    (with-slots (objects to-cleanup) viewer
       (setf to-cleanup objects)
-      (setf objects nil)
-      (setf modified t))))
+      (setf objects nil))))
 
