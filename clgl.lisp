@@ -136,7 +136,7 @@
     prims))
 
 (defmacro simple-animation ((variable duration) &body body)
-  `(dotimes (,variable (1+ (* 30 ,duration)))
+  `(dotimes (,variable (ceiling (1+ (* 30 ,duration))))
      ,@body
      (sleep (/ 1.0 30.0))))
 
