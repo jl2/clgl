@@ -7,11 +7,12 @@
 (defclass viewport ()
   ())
 
-(defgeneric handle-mouse-drag (view x-diff y-diff))
+(defgeneric handle-mouse-drag (view  x-diff y-diff))
 (defmethod handle-mouse-drag (view x-diff y-diff))
 
-(defgeneric handle-scroll (view amount))
-(defmethod handle-scroll (view amount))
+(defgeneric handle-scroll (view x-amount y-amount))
+(defmethod handle-scroll (view x-amount y-amount)
+  (declare (ignorable view x-amount y-amount)))
 
 (defgeneric get-transform-matrix (view))
 (defmethod get-transform-matrix (view)
@@ -21,16 +22,17 @@
   ((radius :initarg :radius :initform 10.0)
    (center :initarg :center :initform (vec3 0 0 0))))
 
-(defmethod handle-scroll ((view 2d-viewport) amount)
+(defmethod handle-scroll ((view 2d-viewport) x-amount y-amount)
+  (declare (ignorable x-amount y-amount))
   (with-slots (radius) view
-    (setf radius (clamp (* (- 1.0 (* amount 0.5)) radius) 0.1 100.0))))
+    (setf radius (clamp (* (- 1.0 (* y-amount 0.25)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view 2d-viewport) x-diff y-diff)
+  (declare (ignorable x-diff y-diff))
   (with-slots (radius center) view
-    (setf center (vec3 (clamp (- (vx center) (* x-diff radius)) -1000.0 1000.0)
-                       (clamp (+ (vy center) (* y-diff radius)) -1000.0 1000.0)
-                       0.0
-                       ))))
+    (setf center (vec3 (clamp (- (vx center) (* 10 x-diff radius)) -1000.0 1000.0)
+                       (clamp (+ (vy center) (* 10 y-diff radius)) -1000.0 1000.0)
+                       0.0))))
 
 (defmethod get-transform-matrix ((view 2d-viewport))
   (with-slots (radius center) view
@@ -75,9 +77,10 @@
        (mrotation +vx+ theta)
        ))))
 
-(defmethod handle-scroll ((view rotating-viewport) amount)
+(defmethod handle-scroll ((view rotating-viewport) x-amount y-amount)
+  (declare (ignorable x-amount y-amount))
   (with-slots (radius) view
-    (setf radius (clamp (* (- 1.0 (* amount 0.5)) radius) 0.1 100.0))))
+    (setf radius (clamp (* (- 1.0 (* y-amount 0.5)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
   (with-slots (theta phi) view

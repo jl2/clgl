@@ -5,5 +5,5 @@ out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(Color.r, 0, Color.g, 1.0);
+    outColor = Color;
 }
