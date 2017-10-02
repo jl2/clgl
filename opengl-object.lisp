@@ -40,8 +40,7 @@
   (with-slots (vao shader-programs) object
     (when (= 0 vao)
       (setf vao (gl:gen-vertex-array)))
-    (gl:bind-vertex-array vao)
-    (rebuild-shaders object)))
+    (gl:bind-vertex-array vao)))
 
 (defmethod fill-buffers :after ((object opengl-object))
   (gl:bind-vertex-array 0))

@@ -12,7 +12,7 @@
    (fragment-text :initarg :fragment)
    (vertex-shader :initform 0)
    (fragment-shader :initform 0)
-   (program :initform nil)))
+   (program :initform 0)))
 
 (defmethod cleanup ((obj shader-program))
   "Delete a shader on the GPU."
@@ -29,7 +29,6 @@
     (setf program 0)))
 
 (defun compile-shader (shader text)
-  (format t "Recompiling ~a~%" text)
   (gl:shader-source shader text)
   (gl:compile-shader shader)
   (when (not (eq t (gl:get-shader shader :compile-status)))
@@ -39,12 +38,16 @@
 (defun build-program (program)
   (with-slots (vertex-text fragment-text vertex-shader fragment-shader program) program
 
-    (when (zerop vertex-shader)
-      (setf vertex-shader (gl:create-shader :vertex-shader)))
+    (if (zerop vertex-shader)
+        (setf vertex-shader (gl:create-shader :vertex-shader))
+        (when (not (zerop program))
+          (gl:detach-shader program vertex-shader)))
     (compile-shader vertex-shader vertex-text)
 
-    (when (zerop fragment-shader)
-      (setf fragment-shader (gl:create-shader :fragment-shader)))
+    (if (zerop fragment-shader)
+        (setf fragment-shader (gl:create-shader :fragment-shader))
+        (when (not (zerop program))
+          (gl:detach-shader program fragment-shader)))
     (compile-shader fragment-shader fragment-text)
 
     (when (zerop program)
