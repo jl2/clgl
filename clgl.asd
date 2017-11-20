@@ -14,6 +14,7 @@
                #:3d-vectors
                #:3d-matrices
                #:gpxtools
+               #:kdtree
                #:stl)
   :serial t
   :components ((:file "package")

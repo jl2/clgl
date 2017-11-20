@@ -28,7 +28,8 @@
         (gl:free-gl-array gl-indices)
         (setf triangle-count (length idxs))))))
 
-(defmethod render ((object stl-file) viewport)
+(defmethod render ((object stl-file) viewport frame)
+  (declare (ignorable frame))
   (call-next-method)
   (with-slots (vbos ebos transformation draw-style triangle-count shader-programs) object
 

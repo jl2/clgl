@@ -27,7 +27,7 @@
   (:documentation "Base class for all objects that can be rendered in a scene."))
 
 (defgeneric fill-buffers (object))
-(defgeneric render (object viewport))
+(defgeneric render (object viewport frame))
 
 (defgeneric rebuild-shaders (object))
 (defmethod rebuild-shaders ((object opengl-object))
@@ -59,12 +59,14 @@
     (setf vao 0)
     (setf vbos nil)))
 
-(defmethod render ((object opengl-object) viewport)
+(defmethod render ((object opengl-object) viewport frame)
+  (declare (ignorable frame))
   (with-slots (vao transformation shader-programs) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao))))
 
-(defmethod render :after ((object opengl-object) viewport)
+(defmethod render :after ((object opengl-object) viewport frame)
+  (declare (ignorable frame))
   (gl:bind-vertex-array 0))
 
 (defun to-gl-float-array (arr)

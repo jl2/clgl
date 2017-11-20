@@ -29,14 +29,12 @@
    #:set-viewport
    #:clear
 
-   #:force-redraw
-
    #:scale-object
    #:translate-object
    #:rotate-object
 
    #:stl-file
-   
+
    #:primitives
    #:add-point
    #:add-line
@@ -72,5 +70,12 @@
    #:simple-animation
 
    #:gpx-heatmap
-   #:get-matrix))
+   #:get-matrix
+   #:kdtree-view
+   #:from-points
+   #:kdtree-reduce-points
+   #:fractal-tree
+   #:strange-attractor
+   #:random-attractor
+   #:affine-transform))
 

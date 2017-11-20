@@ -17,7 +17,9 @@
 
    (first-click-position :initform nil)
    (last-mouse-position :initform nil)
-   (should-close :initform nil))
+   (should-close :initform nil)
+   (frame :initform 0)
+   (fps :initform 30 :initarg :fps))
   (:documentation "A viewport and a collection of objects."))
 
 (defmacro with-viewer-lock ((viewer) &body body)
@@ -35,18 +37,19 @@
 (defmethod view-render ((viewer viewer))
   (declare (ignorable viewer))
   (with-viewer-lock (viewer)
-    (with-slots (objects viewport) viewer
+    (with-slots (objects viewport frame) viewer
       (gl:enable :line-smooth
                  :polygon-smooth
-                 :cull-face
+                 ;;:cull-face
                  :depth-test :depth-clamp
-                 :blend)
-      (gl:depth-range -10.1 10.1)
+                 ;;:blend
+                 )
+      (gl:depth-range -100.1 100.1)
       (gl:blend-func :one :one-minus-src-alpha)
       (gl:clear-color 0.0 0.0 0.0 1.0)
       (gl:clear :color-buffer :depth-buffer)
       (dolist (object objects)
-        (render (cdr object) viewport)))))
+        (render (cdr object) viewport frame)))))
 
 (defmethod view-idle ((viewer viewer))
   (with-viewer-lock (viewer)
@@ -159,7 +162,8 @@
            do (swap-buffers)
            do (poll-events))
         (with-viewer-lock (viewer)
-          (with-slots (objects) viewer
+          (with-slots (objects frame) viewer
+            (incf frame)
             (dolist (object objects)
               (cleanup (cdr object))))))
       (setf *global-viewer* nil))))

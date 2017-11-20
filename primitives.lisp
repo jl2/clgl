@@ -161,22 +161,23 @@
            (gl:buffer-data :element-array-buffer :static-draw gl-indices)
            (gl:free-gl-array gl-indices)))))
 
-(defmethod render ((object primitives) viewport)
+(defmethod render ((object primitives) viewport frame)
+  (declare (ignorable frame))
   (call-next-method)
   (with-slots (vbos ebos transformation points lines triangles filled-triangles shader-programs) object
     (when (and vbos ebos)
       (when (> (length points) 0)
-        (gl:polygon-mode :front-and-back :line)
-
         (gl:bind-buffer :array-buffer (car vbos))
         (use-program (car shader-programs) transformation viewport)
         (gl:bind-buffer :element-array-buffer (point-ebo ebos))
+        (gl:polygon-mode :front-and-back :line)
         (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
 
       (when (> (length lines) 0)
         (gl:bind-buffer :array-buffer (car vbos))
         (use-program (car shader-programs) transformation viewport)
         (gl:bind-buffer :element-array-buffer (line-ebo ebos))
+        (gl:polygon-mode :front-and-back :line)
         (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 
       (when (> (length triangles) 0)
