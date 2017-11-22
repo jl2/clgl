@@ -34,7 +34,7 @@
     (clgl:add-line prims (v__z lower) (v__z upper) (vec4 0 0 1 1))
     prims))
 
-(defun make-2d-axis (&key (lower (vec3 -1 -1 0)) (upper (vec3 1 1 0)))
+(defun make-2d-axis (&key (lower (vec3 -10 -10 0)) (upper (vec3 10 10 0)))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 0 1 1))
@@ -480,7 +480,7 @@
             when (< cprob (car item))
             do
               (setf the-point (m* (cdr item) the-point))
-              (format t "chose ~a because ~a~%" item cprob )
+              ;; (format t "chose ~a because ~a~%" item cprob )
               (add-point prims (vxyz the-point) (vec4 0.0 1.0 0.0 1.0))))
     prims))
 
