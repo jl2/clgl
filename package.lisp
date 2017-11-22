@@ -10,6 +10,8 @@
    #:viewport
    #:get-transform-matrix
 
+   #:map-pt
+
    #:2d-viewport
    #:look-at-viewport
    #:simple-viewport
@@ -69,7 +71,6 @@
 
    #:simple-animation
 
-   #:gpx-heatmap
    #:get-matrix
    #:kdtree-view
    #:from-points
