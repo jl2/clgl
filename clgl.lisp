@@ -250,9 +250,9 @@
     (clgl:set-viewport
      viewer
      (make-instance 'clgl:look-at-viewport :up +vy+
-      :eye (vec3 (* radius (cos (* i (/ pi 180))))
-                 (/ radius 2)
-                 (* radius (sin (* i (/ pi 180)))))))))
+                    :eye (vec3 (* radius (cos (* i (/ pi 180))))
+                               (/ radius 2)
+                               (* radius (sin (* i (/ pi 180)))))))))
 
 (defun plotter (&optional (in-thread nil))
   (let ((viewer (make-instance 'clgl:viewer :viewport (make-instance 'clgl:2d-viewport))))
@@ -276,8 +276,11 @@
      finally (return (values (vec3 min-x min-y min-z) (vec3 max-x max-y max-z)))))
 
 (defun map-pt (val min-val max-val)
-  (v- (v* (vec3 2 2 2) (v/ (v- val min-val) (v- max-val min-val))) (vec3 1.0 1.0 1.0)))
-
+  (let ((tmp (v- (v* 
+                  (v/ (v- val min-val)
+                      (v- max-val min-val)))
+                 (vec3 0.5 0.5 0.5))))
+    (vec3 (vx tmp) (- (vy tmp)) (vz val))))
 
 (defmethod bounding-box ((points kdtree:kd-tree-node))
   (let* ((min-point (kdtree:kd-tree-node-pt points))
@@ -374,9 +377,9 @@
 (defun to-rectangular (delta)
   "Convert a length and angle (polar coordinates) into x,y rectangular coordinates."
   (vec3
-   (* (sin (vz delta)) (cos (vy delta)) (vx delta))
-   (* (sin (vz delta)) (sin (vy delta)) (vx delta))
-   (* (cos (vz delta)) (vx delta))))
+   (* (vz delta) (cos (vy delta)) (cos (vx delta)))
+   (* (vz delta) (sin (vy delta)) (cos (vx delta)))
+   (* (vz delta) (sin (vx delta)))))
 
 (defun fractal-tree (&key (maxdepth 4) (theta-limbs 4) (phi-limbs 4) (color (vec4 0 1 0 1)))
   "Draw a fractal tree into the specified file, recursing to maxdepth, with the specified number of limbs at each level."

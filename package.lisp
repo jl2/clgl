@@ -78,5 +78,7 @@
    #:fractal-tree
    #:strange-attractor
    #:random-attractor
-   #:affine-transform))
+   #:affine-transform
+
+   #:to-rectangular))
 
