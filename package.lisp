@@ -23,6 +23,8 @@
    #:point-on-sphere
 
    #:viewer
+   #:2d-viewer
+   #:3d-viewer
    #:show-viewer
    #:close-viewer
    #:add-object
@@ -49,10 +51,14 @@
    #:make-3d-axis
    #:make-2d-axis
    #:random-primitives
+   #:random-filled-triangles
 
    #:2d-plot
    #:3d-plot-1var
    #:3d-plot-2var
+   #:3d-plot
+   #:vector-plot
+
    #:plotter
    #:xy-square
    #:xz-square
@@ -75,13 +81,18 @@
    #:get-matrix
    #:kdtree-view
    #:from-points
+   #:from-point-list
    #:kdtree-reduce-points
    #:fractal-tree
    #:strange-attractor
    #:random-attractor
    #:affine-transform
+<<<<<<< HEAD
 
    #:random-affine-transform
 
+=======
+   #:with-viewer-lock
+>>>>>>> 39669351115d8aa2a68230dc43973dba3423ced3
    #:to-rectangular))
 

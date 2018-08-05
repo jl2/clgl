@@ -26,6 +26,18 @@
                     (random-color)))
     prims))
 
+(defun random-filled-triangles (count)
+  (let ((prims (make-instance 'primitives)))
+    (flet ((random-function ()
+             (randr :min -10.0 :max 10.0)))
+    (dotimes (i count)
+      (add-filled-triangle prims
+                    (vec3 (random-function) (random-function) 0.0)
+                    (vec3 (random-function) (random-function) 0.0)
+                    (vec3 (random-function) (random-function) 0.0)
+                    (random-color)))
+    prims)))
+
 
 (defun make-3d-axis (&key (lower (vec3 -10 -10 -10)) (upper (vec3 10 10 10)))
   (let* ((prims (make-instance 'clgl:primitives)))
@@ -82,7 +94,7 @@
     prims))
 
 (defun axis-viewer (&key (name 'object) (object nil) (show t) (in-thread nil))
-  (let ((viewer (make-instance 'viewer :viewport (make-instance 'clgl:simple-viewport :distance 4))))
+  (let ((viewer (make-instance 'viewer :viewport (make-instance 'clgl:rotating-viewport :radius 4))))
     (add-object viewer 'axis (make-3d-axis))
     (when object
       (add-object viewer name object ))
@@ -164,6 +176,25 @@
             ;;                 (funcall zf u-value v-value))
             ;;            color)
             ))))
+(defun vector-plot (&key
+                      (vfun (lambda (pt)
+                              (vec3 (sin (vx pt))
+                                    (cos (vy pt))
+                                    (vz pt))))
+                      (min-t (vec3 (- pi) (- pi) (- pi)))
+                      (max-t (vec3 pi pi pi))
+                      (steps 200)
+                      (color (vec4 0.0 1.0 0.0 1.0)))
+  (let ((prims (make-instance 'primitives))
+        (dt (v/ (v- max-t min-t) (vec3 steps steps steps) 1.0)))
+    (dotimes (i (1- steps))
+      (let* ((i-vec (vec3 i i i))
+            (t-value (v+ min-t (v* dt i-vec)))
+            (next-t-value (v+ min-t (v* dt (v+ i-vec (vec3 1 1 1))))))
+        (add-line prims
+                  (funcall vfun t-value)
+                  (funcall vfun next-t-value)
+                  color)))
     prims))
 
 (defmacro simple-animation ((variable duration) &body body)
@@ -355,8 +386,15 @@
 
 (defun from-points (all-points &optional (color (vec4 0 1 0 1)))
   (let ((prims (make-instance 'primitives)))
+    (loop for pt across all-points
+       do
+         (add-point prims pt color))
+    prims))
+
+(defun from-point-list (all-points &optional (color (vec4 0 1 0 1)))
+  (let ((prims (make-instance 'primitives)))
     (multiple-value-bind (min-pt max-pt) (bounding-box all-points)
-      (loop for pt across all-points
+      (loop for pt in all-points
          for mapped-pt = (map-pt pt min-pt max-pt) then (map-pt pt min-pt max-pt)
          do
            (add-point prims mapped-pt color)))

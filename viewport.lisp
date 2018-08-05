@@ -19,19 +19,20 @@
   (meye 4))
 
 (defclass 2d-viewport (viewport)
-  ((radius :initarg :radius :initform 4.0)
-   (center :initarg :center :initform (vec3 0 0 0))))
+  ((radius :initarg :radius :initform 4.0 :type double-float)
+   (center :initarg :center :initform (vec3 0 0 0) :type vec3)))
 
 (defmethod handle-scroll ((view 2d-viewport) x-amount y-amount)
   (declare (ignorable x-amount y-amount))
+  (declare (type double-float x-amount y-amount))
   (with-slots (radius) view
-    (setf radius (clamp (* (- 1.0 (* y-amount 0.5)) radius) 0.1 1000.0))))
+    (setf radius (clamp (* (- 1.0 (* y-amount 0.25)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view 2d-viewport) x-diff y-diff)
   (declare (ignorable x-diff y-diff))
   (with-slots (radius center) view
-    (setf center (vec3 (clamp (- (vx center) (* 5 x-diff radius)) -1000.0 1000.0)
-                       (clamp (+ (vy center) (* 5 y-diff radius)) -1000.0 1000.0)
+    (setf center (vec3 (clamp (- (vx center) (* 2 x-diff radius)) -1000.0 1000.0)
+                       (clamp (+ (vy center) (* 2 y-diff radius)) -1000.0 1000.0)
                        0.0))))
 
 (defmethod get-transform-matrix ((view 2d-viewport))
@@ -39,7 +40,6 @@
     (let ((nradius (- radius))
           (ir (/ 1.0 radius)))
       (m*
-       
        (mscaling (vec3 ir ir 0.0))
        (mortho nradius radius
                nradius radius
@@ -74,18 +74,17 @@
        (mtranslation (vec3 0 0 (- radius)))
        (mortho min-val max-val min-val max-val min-val max-val)
        (mrotation +vy+ phi)
-       (mrotation +vx+ theta)
-       ))))
+       (mrotation +vx+ theta)))))
 
 (defmethod handle-scroll ((view rotating-viewport) x-amount y-amount)
   (declare (ignorable x-amount y-amount))
   (with-slots (radius) view
-    (setf radius (clamp (* (- 1.0 (* y-amount 0.5)) radius) 0.1 100.0))))
+    (setf radius (clamp (* (- 1.0 (* y-amount 0.05)) radius) 0.1 100.0))))
 
 (defmethod handle-mouse-drag ((view rotating-viewport) x-diff y-diff)
   (with-slots (theta phi) view
     (setf theta (clamp (+ theta  y-diff) (* -4 pi) (* 4 pi)))
-    (setf phi (clamp (- phi  x-diff) (* -4 pi) (* 4 pi)))))
+    (setf phi (clamp (- phi x-diff) (* -4 pi) (* 4 pi)))))
 
 (defclass simple-viewport (viewport)
   ((distance :initform 10 :initarg :distance)))

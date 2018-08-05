@@ -1,10 +1,10 @@
 ;;;; clgl.asd
 ;;;;
-;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah.larocco@gmail.com>
+;;;; Copyright (c) 2017 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 (asdf:defsystem #:clgl
   :description "A simple, REPL friendly graphics library using OpenGL."
-  :author "Jeremiah LaRocco <jeremiah.larocco@gmail.com>"
+  :author "Jeremiah LaRocco <jeremiah_larocco@fastmail.com>"
   :license "ISC"
   :depends-on (#:alexandria
                #:cl-glfw3
@@ -13,7 +13,7 @@
                #:trivial-main-thread
                #:3d-vectors
                #:3d-matrices
-               #:gpxtools
+               ;; #:gpxtools
                #:kdtree
                #:stl
                #:j-utils)
