@@ -51,7 +51,8 @@
    #:random-primitives
 
    #:2d-plot
-   #:3d-plot
+   #:3d-plot-1var
+   #:3d-plot-2var
    #:plotter
    #:xy-square
    #:xz-square
@@ -79,6 +80,8 @@
    #:strange-attractor
    #:random-attractor
    #:affine-transform
+
+   #:random-affine-transform
 
    #:to-rectangular))
 

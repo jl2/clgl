@@ -25,13 +25,13 @@
 (defmethod handle-scroll ((view 2d-viewport) x-amount y-amount)
   (declare (ignorable x-amount y-amount))
   (with-slots (radius) view
-    (setf radius (clamp (* (- 1.0 (* y-amount 0.5)) radius) 0.1 100.0))))
+    (setf radius (clamp (* (- 1.0 (* y-amount 0.5)) radius) 0.1 1000.0))))
 
 (defmethod handle-mouse-drag ((view 2d-viewport) x-diff y-diff)
   (declare (ignorable x-diff y-diff))
   (with-slots (radius center) view
-    (setf center (vec3 (clamp (- (vx center) (* 1 x-diff radius)) -1000.0 1000.0)
-                       (clamp (+ (vy center) (* 1 y-diff radius)) -1000.0 1000.0)
+    (setf center (vec3 (clamp (- (vx center) (* 5 x-diff radius)) -1000.0 1000.0)
+                       (clamp (+ (vy center) (* 5 y-diff radius)) -1000.0 1000.0)
                        0.0))))
 
 (defmethod get-transform-matrix ((view 2d-viewport))

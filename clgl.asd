@@ -15,7 +15,8 @@
                #:3d-matrices
                #:gpxtools
                #:kdtree
-               #:stl)
+               #:stl
+               #:j-utils)
   :serial t
   :components ((:file "package")
                (:file "clgl")

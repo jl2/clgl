@@ -40,12 +40,13 @@
     (with-slots (objects viewport frame) viewer
       (gl:enable :line-smooth
                  :polygon-smooth
-                 ;;:cull-face
+                 :cull-face
                  :depth-test :depth-clamp
-                 ;;:blend
+                 :blend
                  )
       (gl:depth-range -100.1 100.1)
-      (gl:blend-func :one :one-minus-src-alpha)
+      (gl:blend-equation-separate  :func-add :func-add)
+      (gl:blend-func-separate :src-alpha :one-minus-src-alpha :one :zero)
       (gl:clear-color 0.0 0.0 0.0 1.0)
       (gl:clear :color-buffer :depth-buffer)
       (dolist (object objects)
@@ -137,7 +138,7 @@
       (setf *global-viewer* viewer)
       (with-window (:title "OpenGL Scene Viewer"
                            :width (/ cur-width 2)
-                           :height (/ cur-height 2)
+                           :height cur-height ;;(/ cur-height 2)
                            :decorated t
                            ;; :monitor monitor
                            :opengl-profile :opengl-core-profile
