@@ -35,9 +35,9 @@
   (+ min (random (- max min))))
 
 (defun random-color ()
-  (vec4 (randr :min 0.25 :max 1.0)
-        (randr :min 0.25 :max 1.0)
-        (randr :min 0.25 :max 1.0)
+  (vec4 0.0
+        (randr :min 0.5 :max 1.0)
+        (randr :min 0.5 :max 1.0)
         1.0f0))
 
 (defun point-on-sphere (radius)

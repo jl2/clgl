@@ -84,6 +84,7 @@
 (defmethod view-key-press ((viewer viewer) key scancode action mod-keys)
   (declare (ignorable key scancode action mod-keys))
   (with-viewer-lock (viewer)
+    (format t "Got key: ~a in viewer:view-key-press~%" (list key scancode action mod-keys))
     (with-slots (last-mouse-position first-click-position objects to-cleanup geometry-modified should-close viewport) viewer
       (cond ((and (eq key :escape) (eq action :press) first-click-position)
              (setf first-click-position nil)
@@ -108,11 +109,13 @@
   (declare (ignorable x y))
   (with-viewer-lock (viewer)
     (with-slots (viewport) viewer
+      ;;(format t "Calling handle-scroll.~%")
       (handle-scroll viewport x y))))
 
 (def-key-callback to-global-keyboard (window key scancode action mod-keys)
   (declare (ignorable window))
   (when *global-viewer*
+    ;;(format t "Calling view-key-press on a ~a~%" (type-of *global-viewer*))
     (view-key-press *global-viewer* key scancode action mod-keys)))
 
 (def-mouse-button-callback to-global-mouse (window button action mod-keys)
@@ -176,7 +179,7 @@
         (setf objects (remove name objects :key #'car))))))
 
 (defun recompile-shaders (viewer name)
-  (format t "Telling ~a to recompile shaders for ~a~%" viewer name)
+  ;; (format t "Telling ~a to recompile shaders for ~a~%" viewer name)
   (with-viewer-lock (viewer)
     (with-slots (to-recompile) viewer
       (push name to-recompile))))
@@ -199,7 +202,6 @@
       (when window
         (set should-close t)))))
 
-
 (defun set-viewport (viewer new-viewport)
   (with-viewer-lock (viewer)
     (with-slots (viewport) viewer
@@ -218,7 +220,9 @@
   (with-viewer-lock (viewer)
     (with-slots (objects geometry-modified) viewer
       (when-let ((items (assoc object-name objects)))
-        (nmscale (slot-value (cdr items) 'transformation) (vec3 scale scale scale))))))
+        (nmscale (slot-value (cdr items) 'transformation) (etypecase scale 
+                                                            (vec3 scale)
+                                                            (t (vec3 scale scale scale))))))))
 
 (defun translate-object (viewer object-name offset)
   (with-viewer-lock (viewer)
@@ -234,3 +238,12 @@
 
 
 
+(defun 2d-viewer (&key (radius 1.0) (in-thread nil))
+  (let ((v (make-instance 'viewer :viewport (make-instance '2d-viewport :radius radius))))
+    (show-viewer v in-thread)
+    v))
+
+(defun 3d-viewer (&key (radius 1.0) (in-thread nil))
+  (let ((v (make-instance 'viewer :viewport (make-instance 'rotating-viewport :radius radius))))
+    (show-viewer v in-thread)
+    v))
