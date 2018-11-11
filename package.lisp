@@ -44,7 +44,10 @@
    #:add-line
    #:add-triangle
    #:add-filled-triangle
-   #:add-box
+   #:add-wire-quad
+   #:add-filled-quad
+   #:add-solid-box
+   #:add-wire-box
    #:axis-viewer
 
    #:make-line-pattern
@@ -87,12 +90,8 @@
    #:strange-attractor
    #:random-attractor
    #:affine-transform
-<<<<<<< HEAD
-
    #:random-affine-transform
 
-=======
    #:with-viewer-lock
->>>>>>> 39669351115d8aa2a68230dc43973dba3423ced3
    #:to-rectangular))
 

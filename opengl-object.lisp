@@ -47,6 +47,7 @@
 
 (defmethod cleanup ((object opengl-object))
   (declare (ignorable object))
+  (format t "Cleanuing up ~a~%" object)
   (with-slots (vao vbos ebos shader-programs) object
     (when (/= 0 vao)
       (when vbos
