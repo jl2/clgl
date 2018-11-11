@@ -44,7 +44,7 @@
    #:add-line
    #:add-triangle
    #:add-filled-triangle
-
+   #:add-box
    #:axis-viewer
 
    #:make-line-pattern
