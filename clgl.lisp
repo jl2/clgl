@@ -39,14 +39,14 @@
     prims)))
 
 
-(defun make-3d-axis (&key (lower (vec3 -1 -1 -1)) (upper (vec3 1 1 1)))
+(defun make-3d-axis (&key (lower (vec3 -10 -10 -10)) (upper (vec3 10 10 10)))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 1 0 1))
     (clgl:add-line prims (v__z lower) (v__z upper) (vec4 0 0 1 1))
     prims))
 
-(defun make-2d-axis (&key (lower (vec3 -1 -1 0)) (upper (vec3 1 1 0)))
+(defun make-2d-axis (&key (lower (vec3 -10 -10 0)) (upper (vec3 10 10 0)))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 0 1 1))
@@ -124,7 +124,7 @@
                   color)))
     prims))
 
-(defun 3d-plot (&key
+(defun 3d-plot-1var (&key
                   (yf #'sin)
                   (xf #'identity)
                   (zf #'cos)
@@ -147,6 +147,35 @@
                   color)))
     prims))
 
+(defun 3d-plot-2var (&key
+                  (xf (lambda (u v) (declare (ignorable u v)) u))
+                  (yf (lambda (u v) (declare (ignorable u v)) (+ (cos (* 2 u)) (sin v))))
+                  (zf (lambda (u v) (declare (ignorable u v)) v))
+                  (u-min 0 )
+                  (u-max (* 2 pi))
+                  (v-min (- pi))
+                  (v-max pi)
+                  (u-steps 100)
+                  (v-steps 100)
+                  (color (vec4 0.0 1.0 0.0 1.0)))
+  (let ((prims (make-instance 'primitives))
+        (du (/ (- u-max u-min) 1.0 u-steps))
+        (dv (/ (- v-max v-min) 1.0 v-steps)))
+    (dotimes (i (1- u-steps))
+      (let* ((u-value (+ u-min (* du i)))
+            (next-u-value (+ u-value du)))
+        (declare (ignorable next-u-value))
+        (dotimes (j (1- v-steps))
+          (let* ((v-value (+ v-min (* dv j)))
+                (next-v-value (+ v-value dv)))
+            (declare (ignorable next-v-value))
+            (add-quad prims color xf yf zf u-value v-value next-u-value next-v-value nil)
+            ;; (add-point prims
+            ;;            (vec (funcall xf u-value v-value)
+            ;;                 (funcall yf u-value v-value)
+            ;;                 (funcall zf u-value v-value))
+            ;;            color)
+            ))))
 (defun vector-plot (&key
                       (vfun (lambda (pt)
                               (vec3 (sin (vx pt))
@@ -169,9 +198,9 @@
     prims))
 
 (defmacro simple-animation ((variable duration) &body body)
-  `(dotimes (,variable (ceiling (1+ (* 30 ,duration))))
+  `(dotimes (,variable (ceiling (1+ (* 60 ,duration))))
      ,@body
-     (sleep (/ 1.0 30.0))))
+     (sleep (/ 1.0 60.0))))
 
 (defun xy-square ()
   (let ((square (make-instance 'clgl:primitives)))
@@ -540,39 +569,86 @@
               z zz)))
     prims))
 
+(defun random-rotation (min-angle max-angle)
+  (let ((angle (random-range min-angle max-angle)))
+    (mat4 (list (cos angle)  (- (sin angle)) 0.0 0.0
+          (sin angle)  (cos angle)     0.0 0.0
+          0.0          0.0             1.0 0.0 
+          0.0          0.0             0.0 1.0 ))))
+
+(defun random-translation (min max)
+  (mat4 (list 1 0 0 (random-range min max)
+        0 1 0 (random-range min max)
+        0 0 1 (random-range min max)
+        0 0 0 1)))
+
+(defun random-scale (min max)
+  (mat4 (list (random-range min max) 0 0 0
+        0 (random-range min max) 0 0
+        0 0 (random-range min max) 0
+        0 0 0 1)))
+
+(defun random-transform (min-angle max-angle min-trans max-trans min-scale max-scale)
+  (m* (random-rotation min-angle max-angle)
+      (random-translation min-trans max-trans)
+      (random-scale min-scale max-scale)))
+
+(defun random-affine-transform (iterations form-count)
+  (let ((probabilities (ju:n-random-to-sum form-count 1.0)))
+    (affine-transform :iterations iterations
+                      :xforms 
+                      (sort (loop for prob in probabilities collecting
+                                 (cons prob (random-transform (- pi) pi
+                                                              -1.0 1.0
+                                                              0.95 1.015)))
+                            #'> :key #'car)))
+  )
+
 (defun affine-transform (&key
-                           (iterations 500000)
-                           (xforms (list (cons 0.01 (mat4 '(0.0 0.0 0.0 0.0
-                                                          0.0 0.16 0.0 0.0
-                                                          0.0 0.0 1.0 0.0
-                                                          0.0 0.0 0.0 1.0)))
-                                         (cons 0.85 (mat4 '(0.85 0.04 0.0 0.0
-                                                          -0.04 0.85 0.0 1.60
-                                                          0.0 0.0 1.0 0.0
-                                                          0.0 0.0 0.0 1.0)))
-                                         (cons 0.07 (mat4 '(0.20 -0.26 0.0 0.0
-                                                          0.23 0.22 0.0 1.60
-                                                          0.0 0.0 1.0 0.0
-                                                          0.0 0.0 0.0 1.0)))
-                                         (cons 0.07 (mat4 '(-0.15 0.28 0.0 0.0
-                                                          0.26 0.24 0.0 0.44
-                                                          0.0 0.0 1.0 0.0
-                                                          0.0 0.0 0.0 1.0))))))
+                           (iterations 80000)
+                           (xforms 
+                            
+                            (list
+                             
+                             (cons 0.85 (mat4 '(0.85 0.04 0.0 0.0
+                                                -0.04 0.85 0.0 1.60
+                                                0.0 0.0 1.0 0.0
+                                                0.0 0.0 0.0 1.0)))
+                             (cons 0.07 (mat4 '(0.20 -0.26 0.0 0.0
+                                                0.23 0.22 0.0 1.60
+                                                0.0 0.0 1.0 0.0
+                                                0.0 0.0 0.0 1.0)))
+                             (cons 0.07 (mat4 '(-0.15 0.28 0.0 0.0
+                                                0.26 0.24 0.0 0.44
+                                                0.0 0.0 1.0 0.0
+                                                0.0 0.0 0.0 1.0)))
+                             (cons 0.01 (mat4 '(0.0 0.0 0.0 0.0
+                                                0.0 0.16 0.0 0.0
+                                                0.0 0.0 1.0 0.0
+                                                0.0 0.0 0.0 1.0)))))
+                           (pt-color (vec4 1.0 0.0 0.0 0.5))
+                           (line-color (vec4 0.25 1.0 0.25 0.25)))
+
   "Draw a strange-attractor fractal into file-name, zoomed into the window specified by xxmin,xxmax and yymin,yymax.  iterations is the number of iterations to run.  a, b, c, d, and e are the parameters of the strange attractor and can be modified for various effects."
   (let ((prims (make-instance 'primitives))
         (the-point (vec4 0 0 0 1.0)))
     (loop
        for i below iterations
+       for prev-point = nil then the-point
        do
          (loop
+            for cprob = (random 1.0)
             for item in xforms
-            for choice from 0
-            for cprob = (random 1.0) then (- cprob (car item))
-            when (< cprob (car item))
+            for cumsum = (car item) then (+ cumsum (car item))
+            when (< cumsum cprob )
             do
+              ;; (format t "~a ~a~%" cprob item)
               (setf the-point (m* (cdr item) the-point))
-              (format t "chose ~a because ~a~%" item cprob )
-              (add-point prims (vxyz the-point) (vec4 0.0 1.0 0.0 1.0))))
+            ;; (format t "chose ~a because ~a~%" item cprob )
+              ;; (when prev-point
+              ;;   (add-line prims (vxyz prev-point) (vxyz the-point) line-color)
+              ;;   )
+              (add-point prims (vxyz the-point) pt-color)))
     prims))
 
 (defun file-visualizer (file-name)

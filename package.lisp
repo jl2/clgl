@@ -54,6 +54,8 @@
    #:random-filled-triangles
 
    #:2d-plot
+   #:3d-plot-1var
+   #:3d-plot-2var
    #:3d-plot
    #:vector-plot
 
@@ -85,6 +87,12 @@
    #:strange-attractor
    #:random-attractor
    #:affine-transform
+<<<<<<< HEAD
+
+   #:random-affine-transform
+
+=======
    #:with-viewer-lock
+>>>>>>> 39669351115d8aa2a68230dc43973dba3423ced3
    #:to-rectangular))
 
