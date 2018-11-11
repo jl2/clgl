@@ -253,6 +253,54 @@
                    (funcall zf nu vv))
              color)))
 
+
+(defun add-quad (obj color pt1 pt2 pt3 pt4 filled)
+  (let ((tri-function (if filled #'add-filled-triangle #'add-triangle)))
+    (funcall tri-function obj
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
+
+             (vec3 (funcall xf nu nv)
+                   (funcall yf nu nv)
+                   (funcall zf nu nv))
+
+             (vec3 (funcall xf uv nv)
+                   (funcall yf uv nv)
+                   (funcall zf uv nv))
+             color)
+
+    (funcall tri-function obj
+
+             (vec3 (funcall xf uv vv)
+                   (funcall yf uv vv)
+                   (funcall zf uv vv))
+
+             (vec3 (funcall xf uv nv)
+                   (funcall yf uv nv)
+                   (funcall zf uv nv))
+
+             (vec3 (funcall xf nu vv)
+                   (funcall yf nu vv)
+                   (funcall zf nu vv))
+             color)))
+
+(defun add-box (obj color
+                pt1 pt2 pt3 pt4
+                pt5 pt6 pt7 pt8
+                filled)
+  (cond (filled
+         (add-filled-triangle obj pt1 pt2 pt3 color)
+         (add-filled-triangle obj pt2 pt3 pt4 color)
+         (add-filled-triangle obj pt5 pt6 pt7 color)
+         (add-filled-triangle obj pt6 pt7 pt8 color))
+        (t 
+         (add-triangle obj pt1 pt2 pt3 color)
+         (add-triangle obj pt2 pt3 pt4 color)
+         (add-triangle obj pt5 pt6 pt7 color)
+         (add-triangle obj pt6 pt7 pt8 color))))
+
+
 (defun make-parametric (&key
                           (xf #'sphere-x)
                           (yf #'sphere-y)
