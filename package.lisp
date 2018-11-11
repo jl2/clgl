@@ -79,20 +79,14 @@
    #:simple-animation
 
    #:get-matrix
-   #:kdtree-view
    #:from-points
    #:from-point-list
-   #:kdtree-reduce-points
    #:fractal-tree
    #:strange-attractor
    #:random-attractor
    #:affine-transform
-<<<<<<< HEAD
-
    #:random-affine-transform
 
-=======
    #:with-viewer-lock
->>>>>>> 39669351115d8aa2a68230dc43973dba3423ced3
    #:to-rectangular))
 

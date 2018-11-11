@@ -175,7 +175,7 @@
             ;;                 (funcall yf u-value v-value)
             ;;                 (funcall zf u-value v-value))
             ;;            color)
-            ))))
+            ))))))
 (defun vector-plot (&key
                       (vfun (lambda (pt)
                               (vec3 (sin (vx pt))
@@ -316,11 +316,14 @@
                                (/ radius 2)
                                (* radius (sin (* i (/ pi 180)))))))))
 
-(defun plotter (&optional (in-thread nil))
+(defun plotter (&key
+                  (xf (lambda (tv) (* 3.0 (cos (* 4 tv)) (sin tv))))
+                  (yf (lambda (tv) (* 3.0 (cos (* 4 tv)) (cos tv))))
+                  (in-thread nil))
   (let ((viewer (make-instance 'clgl:viewer :viewport (make-instance 'clgl:2d-viewport))))
     (add-object viewer 'axis (make-2d-axis))
-    (add-object viewer 'plot (2d-plot :xf (lambda (tv) (* 3.0 (cos (* 4 tv)) (sin tv)))
-                                      :yf (lambda (tv) (* 3.0 (cos (* 4 tv)) (cos tv)))))
+    (add-object viewer 'plot (2d-plot :xf xf
+                                      :yf yf))
     (show-viewer viewer in-thread)
     viewer))
 
@@ -343,36 +346,6 @@
                       (v- max-val min-val)))
                  (vec3 0.5 0.5 0.5))))
     (vec3 (vx tmp) (- (vy tmp)) (vz val))))
-
-(defmethod bounding-box ((points kdtree:kd-tree-node))
-  (let* ((min-point (kdtree:kd-tree-node-pt points))
-         (max-point (kdtree:kd-tree-node-pt points))
-         (min-x (vx min-point))
-         (max-x (vx max-point))
-         (min-y (vy min-point))
-         (max-y (vy max-point))
-         (min-z (vz min-point))
-         (max-z (vz max-point)))
-
-    (cond (min-point
-           (kdtree:each-point points
-                              (lambda (pt)
-                                (setf min-x (min (vx pt) min-x))
-                                (setf max-x (max (vx pt) max-x))
-
-                                (setf min-y (min (vy pt) min-y))
-                                (setf max-y (max (vy pt) max-y))
-
-                                (setf min-z (min (vz pt) min-z))
-                                (setf max-z (max (vz pt) max-z))))
-           )
-          (t
-           (values (vec3 -1 -1 -1) (vec3 1 1 1))))))
-
-(defun kdtree-view (kdt &optional (color (vec4 0 1 0 1)))
-  (let* ((pts (kdtree:to-list kdt))
-         (pt-array (make-array (length pts) :initial-contents pts)))
-    (from-points pt-array color)))
 
 (defmethod bounding-box ((points simple-vector))
   (loop for pt across points
@@ -400,47 +373,20 @@
            (add-point prims mapped-pt color)))
     prims))
 
-;; (defun show-kdtree-inner (prims kdt xmin ymin zmin xmax ymax zmax &optional (depth 0))
-;;   (let ((left (kd-tree-node-left kdt))
-;;         (right (kd-tree-node-right kdt))
-;;         (pt (kd-tree-node-pt kdt))
-;;         (split-direction (mod depth 3)))
-;;     (cond ((= 0 split-direction)
-;;            (add-line prims (vec3 (vx pt) ymin zmin xmin (vy pt)
-;;            (add-line-coords svg  xmin (vx pt) )
-;;            (when left
-;;              (show-kdtree-inner prims left (- radius ymin (point-x pt) ymax (+ 1 depth)))
-;;           (if right
-;;               (inner-svg svg right (point-x pt) ymin xmax ymax (+ 1 depth))))
-;;         (progn
-;;           (svg:add-line-coords svg xmin (point-y pt) xmax (point-y pt))
-;;           (if left
-;;               (inner-svg svg left xmin ymin xmax (point-y pt) (+ 1 depth)))
-;;           (if right
-;;               (inner-svg svg right xmin (point-y pt) xmax ymax (+ 1 depth)))))
-    
-;;     (svg:add-point-coords svg (point-x pt) (point-y pt))))
-
-;; (defun show-kdtree (kdt min-value max-value fname)
-;;   (let ((svg (svg:make-svg))
-;;         (transform (mtranslation (v- (vec3 0 0 0) min-value))))
-;;     (inner-svg svg kdt transform 0 0 800 800)
-;;     (svg:to-file-name svg fname)))
-
 (defun 2d-distance-squared (p1 p2)
   (let* ((xd (- (vx p1) (vx p2)))
          (yd (- (vy p1) (vy p2)))
          (rval (+ (* xd xd) (* yd yd))))
     rval))
 
-(defun kdtree-reduce-points (pts threshold)
-  (let ((kdt (kdtree:create-kd-tree)))
-    (loop for pt across pts do
-         (let ((nearest (kdtree:nearest kdt pt :distance-function #'2d-distance-squared)))
-           (when (or (null nearest) (> (vlength (v- pt nearest)) threshold))
-             (kdtree:add-point kdt pt))))
-    (format t "Size of kdtree is ~a~%" (kdtree:pt-count kdt))
-    (clgl:kdtree-view kdt (vec4 0.0 1.0 0.0 0.5))))
+;; (defun kdtree-reduce-points (pts threshold)
+;;   (let ((kdt (kdtree:create-kd-tree)))
+;;     (loop for pt across pts do
+;;          (let ((nearest (kdtree:nearest kdt pt :distance-function #'2d-distance-squared)))
+;;            (when (or (null nearest) (> (vlength (v- pt nearest)) threshold))
+;;              (kdtree:add-point kdt pt))))
+;;     (format t "Size of kdtree is ~a~%" (kdtree:pt-count kdt))
+;;     (clgl:kdtree-view kdt (vec4 0.0 1.0 0.0 0.5))))
 
 
 (defun to-rectangular (delta)
