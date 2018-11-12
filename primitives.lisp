@@ -84,18 +84,18 @@
            (type color color))
   (let ((normal (triangle-normal pt1 pt2 pt3)))
 
-    (with-slots (filled-vertex-data triangles) object
-      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+    (with-slots (line-vertex-data triangles) object
+      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
                                                 pt1
                                                 normal
                                                 color)
                           triangles)
-      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
                                                 pt2
                                                 normal
                                                 color)
                           triangles)
-      (vector-push-extend (insert-pnc-in-buffer filled-vertex-data
+      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
                                                 pt3
                                                 normal
                                                 color)

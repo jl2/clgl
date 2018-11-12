@@ -321,8 +321,6 @@
   (add-filled-triangle obj pt6 pt8 pt1 color))
 
 
-
-
 (defun make-parametric (&key
                           (xf #'sphere-x)
                           (yf #'sphere-y)
