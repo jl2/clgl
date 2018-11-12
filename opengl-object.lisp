@@ -8,21 +8,19 @@
   ((vao :initform 0 :type fixnum)
    (vbos :initform nil :type (or null cons))
    (ebos :initform nil :type (or null cons))
-   (shader-programs :initform
-                    (list
-                     (make-instance
+   (line-program :initform (make-instance
                       'shader-program
                       :inputs '(("position" . 3) ("color" . 4))
                       :vertex (read-file (merge-pathnames *shader-dir* "default-line-vertex.glsl"))
                       :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))
-
-                     (make-instance
+                 :initarg :line-program)
+   (fill-program :initform
+                   (make-instance
                       'shader-program
                       :inputs '(("position" . 3) ("normal" . 3) ("color" . 4))
                       :vertex (read-file (merge-pathnames *shader-dir* "default-filled-vertex.glsl"))
-                      :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl"))))
-                    :type (or null cons))
-
+                      :fragment(read-file (merge-pathnames *shader-dir* "default-fragment.glsl")))
+                   :initarg :fill-program)
    (transformation :initform (meye 4) :type mat4))
   (:documentation "Base class for all objects that can be rendered in a scene."))
 
@@ -31,13 +29,14 @@
 
 (defgeneric rebuild-shaders (object))
 (defmethod rebuild-shaders ((object opengl-object))
-  (with-slots (vao shader-programs) object
+  (with-slots (vao line-program fill-program) object
     (when vao
       (gl:bind-vertex-array vao)
-      (mapcar #'build-program shader-programs))))
+      (build-program line-program)
+      (build-program fill-program))))
 
 (defmethod fill-buffers ((object opengl-object))
-  (with-slots (vao shader-programs) object
+  (with-slots (vao) object
     (when (= 0 vao)
       (setf vao (gl:gen-vertex-array)))
     (gl:bind-vertex-array vao)))
@@ -48,21 +47,21 @@
 (defmethod cleanup ((object opengl-object))
   (declare (ignorable object))
   (format t "Cleanuing up ~a~%" object)
-  (with-slots (vao vbos ebos shader-programs) object
+  (with-slots (vao vbos ebos line-program fill-program) object
     (when (/= 0 vao)
       (when vbos
         (gl:delete-buffers vbos))
       (when ebos
         (gl:delete-buffers ebos))
-      (dolist (shader-program shader-programs)
-        (cleanup shader-program))
+      (cleanup line-program)
+      (cleanup fill-program)
       (gl:delete-vertex-arrays (list vao)))
     (setf vao 0)
     (setf vbos nil)))
 
 (defmethod render ((object opengl-object) viewport frame)
   (declare (ignorable frame))
-  (with-slots (vao transformation shader-programs) object
+  (with-slots (vao transformation) object
     (when (/= 0 vao)
       (gl:bind-vertex-array vao))))
 

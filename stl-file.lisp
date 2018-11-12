@@ -31,17 +31,17 @@
 (defmethod render ((object stl-file) viewport frame)
   (declare (ignorable frame))
   (call-next-method)
-  (with-slots (vbos ebos transformation draw-style triangle-count shader-programs) object
+  (with-slots (vbos ebos transformation draw-style triangle-count line-program fill-program) object
 
     (cond ((eq draw-style :point)
            (gl:polygon-mode :front-and-back :line)
            (gl:bind-buffer :array-buffer (car vbos))
-           (use-program (cadr shader-programs) transformation viewport)
+           (use-program fill-program transformation viewport)
            (gl:bind-buffer :element-array-buffer (car ebos))
            (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count triangle-count))
           (t
            (gl:polygon-mode :front-and-back draw-style)
            (gl:bind-buffer :array-buffer (car vbos))
-           (use-program (cadr shader-programs) transformation viewport)
+           (use-program fill-program transformation viewport)
            (gl:bind-buffer :element-array-buffer (car ebos))
            (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count triangle-count)))))

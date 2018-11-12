@@ -82,24 +82,24 @@
   (declare (type primitives object)
            (type point pt1 pt2 pt3)
            (type color color))
-  (let ((normal (triangle-normal pt1 pt2 pt3)))
-
+;;  (let ((normal (triangle-normal pt1 pt2 pt3)))
     (with-slots (line-vertex-data triangles) object
-      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
+      (vector-push-extend (insert-pc-in-buffer line-vertex-data
                                                 pt1
-                                                normal
+;;                                                normal
                                                 color)
                           triangles)
-      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
+      (vector-push-extend (insert-pc-in-buffer line-vertex-data
                                                 pt2
-                                                normal
+;;                                                normal
                                                 color)
                           triangles)
-      (vector-push-extend (insert-pnc-in-buffer line-vertex-data
+      (vector-push-extend (insert-pc-in-buffer line-vertex-data
                                                 pt3
-                                                normal
+;;                                                normal
                                                 color)
-                          triangles))))
+                          triangles)))
+;;)
 
 (defun add-filled-triangle (object pt1 pt2 pt3 color)
 
@@ -164,32 +164,32 @@
 (defmethod render ((object primitives) viewport frame)
   (declare (ignorable frame))
   (call-next-method)
-  (with-slots (vbos ebos transformation points lines triangles filled-triangles shader-programs) object
+  (with-slots (vbos ebos transformation points lines triangles filled-triangles line-program fill-program) object
     (when (and vbos ebos)
       (when (> (length points) 0)
         (gl:bind-buffer :array-buffer (car vbos))
-        (use-program (car shader-programs) transformation viewport)
+        (use-program line-program transformation viewport)
         (gl:bind-buffer :element-array-buffer (point-ebo ebos))
         (gl:polygon-mode :front-and-back :line)
         (gl:draw-elements :points (gl:make-null-gl-array :unsigned-int) :count (length points)))
 
       (when (> (length lines) 0)
         (gl:bind-buffer :array-buffer (car vbos))
-        (use-program (car shader-programs) transformation viewport)
+        (use-program line-program transformation viewport)
         (gl:bind-buffer :element-array-buffer (line-ebo ebos))
         (gl:polygon-mode :front-and-back :line)
         (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 
       (when (> (length triangles) 0)
         (gl:bind-buffer :array-buffer (cadr vbos))
-        (use-program (cadr shader-programs) transformation viewport)
+        (use-program line-program transformation viewport)
         (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
         (gl:polygon-mode :front-and-back :line)
         (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length triangles)))
 
       (when (> (length filled-triangles) 0)
         (gl:bind-buffer :array-buffer (cadr vbos))
-        (use-program (cadr shader-programs) transformation viewport)
+        (use-program fill-program transformation viewport)
         (gl:polygon-mode :front-and-back :fill)
         (gl:bind-buffer :element-array-buffer (filled-ebo ebos))
         (gl:draw-elements :triangles (gl:make-null-gl-array :unsigned-int) :count (length filled-triangles))))))
