@@ -14,7 +14,6 @@
                #:3d-vectors
                #:3d-matrices
                ;; #:gpxtools
-               #:kdtree
                #:stl
                #:j-utils)
   :serial t

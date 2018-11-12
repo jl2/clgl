@@ -30,8 +30,8 @@
 
 (defun insert-vect (buffer pt)
   (vector-push-extend (coerce (vx pt) 'single-float) buffer)
-  (vector-push-extend (coerce (vy pt) 'single-float)  buffer)
-  (vector-push-extend (coerce (vz pt) 'single-float)  buffer)
+  (vector-push-extend (coerce (vy pt) 'single-float) buffer)
+  (vector-push-extend (coerce (vz pt) 'single-float) buffer)
   (typecase pt
     (vec4
      (vector-push-extend (coerce (vw pt) 'single-float) buffer))))
