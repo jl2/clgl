@@ -147,35 +147,6 @@
                   color)))
     prims))
 
-(defun 3d-plot-2var (&key
-                  (xf (lambda (u v) (declare (ignorable u v)) u))
-                  (yf (lambda (u v) (declare (ignorable u v)) (+ (cos (* 2 u)) (sin v))))
-                  (zf (lambda (u v) (declare (ignorable u v)) v))
-                  (u-min 0 )
-                  (u-max (* 2 pi))
-                  (v-min (- pi))
-                  (v-max pi)
-                  (u-steps 100)
-                  (v-steps 100)
-                  (color (vec4 0.0 1.0 0.0 1.0)))
-  (let ((prims (make-instance 'primitives))
-        (du (/ (- u-max u-min) 1.0 u-steps))
-        (dv (/ (- v-max v-min) 1.0 v-steps)))
-    (dotimes (i (1- u-steps))
-      (let* ((u-value (+ u-min (* du i)))
-            (next-u-value (+ u-value du)))
-        (declare (ignorable next-u-value))
-        (dotimes (j (1- v-steps))
-          (let* ((v-value (+ v-min (* dv j)))
-                (next-v-value (+ v-value dv)))
-            (declare (ignorable next-v-value))
-            (add-quad prims color xf yf zf u-value v-value next-u-value next-v-value nil)
-            ;; (add-point prims
-            ;;            (vec (funcall xf u-value v-value)
-            ;;                 (funcall yf u-value v-value)
-            ;;                 (funcall zf u-value v-value))
-            ;;            color)
-            ))))))
 (defun vector-plot (&key
                       (vfun (lambda (pt)
                               (vec3 (sin (vx pt))
@@ -251,7 +222,7 @@
   0.0)
 
 
-(defun add-quad (obj color xf yf zf uv vv nu nv filled)
+(defun add-function-quad (obj color xf yf zf uv vv nu nv filled)
   (let ((tri-function (if filled #'add-filled-triangle #'add-triangle)))
     (funcall tri-function obj
              (vec3 (funcall xf nu vv)
@@ -282,52 +253,43 @@
                    (funcall zf nu vv))
              color)))
 
+(defun add-wire-quad (obj color
+                     pt1 pt2 pt3 pt4
+                     pt5 pt6 pt7 pt8)
 
-(defun add-quad (obj color pt1 pt2 pt3 pt4 filled)
-  (let ((tri-function (if filled #'add-filled-triangle #'add-triangle)))
-    (funcall tri-function obj
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
+  (add-triangle obj pt1 pt2 pt3 color)
+  (add-triangle obj pt3 pt4 pt1 color))
 
-             (vec3 (funcall xf nu nv)
-                   (funcall yf nu nv)
-                   (funcall zf nu nv))
+(defun add-filled-quad (obj color
+                        pt1 pt2 pt3 pt4)
+  (add-filled-triangle obj pt1 pt2 pt3 color)
+  (add-filled-triangle obj pt3 pt4 pt1 color))
 
-             (vec3 (funcall xf uv nv)
-                   (funcall yf uv nv)
-                   (funcall zf uv nv))
-             color)
+(defun add-wire-box (obj color
+                     pt1 pt2 pt3 pt4
+                     pt5 pt6 pt7 pt8)
+  (add-filled-triangle obj pt1 pt2 pt3 color)
+  (add-filled-triangle obj pt3 pt4 pt1 color)
 
-    (funcall tri-function obj
+  (add-filled-triangle obj pt5 pt6 pt7 color)
+  (add-filled-triangle obj pt7 pt8 pt5 color)
 
-             (vec3 (funcall xf uv vv)
-                   (funcall yf uv vv)
-                   (funcall zf uv vv))
+  (add-filled-triangle obj pt1 pt2 pt6 color)
+  (add-filled-triangle obj pt6 pt8 pt1 color))
 
-             (vec3 (funcall xf uv nv)
-                   (funcall yf uv nv)
-                   (funcall zf uv nv))
+(defun add-solid-box (obj color
+                      pt1 pt2 pt3 pt4
+                      pt5 pt6 pt7 pt8)
+  (add-filled-triangle obj pt1 pt2 pt3 color)
+  (add-filled-triangle obj pt3 pt4 pt1 color)
 
-             (vec3 (funcall xf nu vv)
-                   (funcall yf nu vv)
-                   (funcall zf nu vv))
-             color)))
+  (add-filled-triangle obj pt5 pt6 pt7 color)
+  (add-filled-triangle obj pt7 pt8 pt5 color)
 
-(defun add-box (obj color
-                pt1 pt2 pt3 pt4
-                pt5 pt6 pt7 pt8
-                filled)
-  (cond (filled
-         (add-filled-triangle obj pt1 pt2 pt3 color)
-         (add-filled-triangle obj pt2 pt3 pt4 color)
-         (add-filled-triangle obj pt5 pt6 pt7 color)
-         (add-filled-triangle obj pt6 pt7 pt8 color))
-        (t 
-         (add-triangle obj pt1 pt2 pt3 color)
-         (add-triangle obj pt2 pt3 pt4 color)
-         (add-triangle obj pt5 pt6 pt7 color)
-         (add-triangle obj pt6 pt7 pt8 color))))
+  (add-filled-triangle obj pt1 pt2 pt6 color)
+  (add-filled-triangle obj pt6 pt8 pt1 color))
+
+
 
 
 (defun make-parametric (&key
@@ -349,7 +311,7 @@
               (vv (+ v-min (* j dv)))
               (nu (+ u-min (* (1+ i) du)))
               (nv (+ v-min (* (1+ j) dv))))
-          (add-quad object color
+          (add-function-quad object color
                     xf yf zf
                     uv vv nu nv
                     filled))))

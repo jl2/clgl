@@ -210,10 +210,12 @@
 
 (defun add-object (viewer name object)
   (with-viewer-lock (viewer)
-    (with-slots (to-refill to-recompile objects) viewer
-      (if-let ((item (assoc name objects)))
-        (setf (cdr item) object)
-        (push (cons name object) objects))
+    (with-slots (to-refill to-recompile objects to-cleanup) viewer
+      (when-let* ((item (assoc name objects))
+                  (old (cdr item)))
+        (push item to-cleanup)
+        (setf objects (remove name objects :key #'car)))
+      (push (cons name object) objects)
       (push name to-refill)
       (push name to-recompile))))
 

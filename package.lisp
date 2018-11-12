@@ -44,7 +44,10 @@
    #:add-line
    #:add-triangle
    #:add-filled-triangle
-   #:add-box
+   #:add-wire-quad
+   #:add-filled-quad
+   #:add-solid-box
+   #:add-wire-box
    #:axis-viewer
 
    #:make-line-pattern
