@@ -287,9 +287,10 @@
 
 (defun add-wire-quad (obj color
                      pt1 pt2 pt3 pt4)
-
-  (add-triangle obj pt1 pt2 pt3 color)
-  (add-triangle obj pt3 pt4 pt1 color))
+  (add-line obj pt1 pt2 color)
+  (add-line obj pt2 pt3 color)
+  (add-line obj pt3 pt4 color)
+  (add-line obj pt4 pt1 color))
 
 (defun add-filled-quad (obj color
                         pt1 pt2 pt3 pt4)
