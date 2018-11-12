@@ -254,8 +254,7 @@
              color)))
 
 (defun add-wire-quad (obj color
-                     pt1 pt2 pt3 pt4
-                     pt5 pt6 pt7 pt8)
+                     pt1 pt2 pt3 pt4)
 
   (add-triangle obj pt1 pt2 pt3 color)
   (add-triangle obj pt3 pt4 pt1 color))
