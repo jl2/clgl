@@ -29,12 +29,12 @@
   (< (abs (- a b )) tolerance))
 
 (defun insert-vect (buffer pt)
-  (vector-push-extend (vx pt) buffer)
-  (vector-push-extend (vy pt) buffer)
-  (vector-push-extend (vz pt) buffer)
+  (vector-push-extend (coerce (vx pt) 'single-float) buffer)
+  (vector-push-extend (coerce (vy pt) 'single-float)  buffer)
+  (vector-push-extend (coerce (vz pt) 'single-float)  buffer)
   (typecase pt
     (vec4
-     (vector-push-extend (vw pt) buffer))))
+     (vector-push-extend (coerce (vw pt) 'single-float) buffer))))
 
 (defun insert-pc-in-buffer (buffer pt color)
   (let ((olen (length buffer)))

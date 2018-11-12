@@ -39,7 +39,7 @@
     prims)))
 
 
-(defun make-3d-axis (&key (lower (vec3 -10 -10 -10)) (upper (vec3 10 10 10)))
+(defun make-3d-axis (&key (lower (vec3 -10.0 -10.0 -10.0)) (upper (vec3 10.0 10.0 10.0)))
   (let* ((prims (make-instance 'clgl:primitives)))
     (clgl:add-line prims (vx__ lower) (vx__ upper) (vec4 1 0 0 1))
     (clgl:add-line prims (v_y_ lower) (v_y_ upper) (vec4 0 1 0 1))
@@ -176,6 +176,8 @@
             ;;                 (funcall zf u-value v-value))
             ;;            color)
             ))))
+    prims))
+    
 (defun vector-plot (&key
                       (vfun (lambda (pt)
                               (vec3 (sin (vx pt))
