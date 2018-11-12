@@ -299,14 +299,14 @@
 (defun add-wire-box (obj color
                      pt1 pt2 pt3 pt4
                      pt5 pt6 pt7 pt8)
-  (add-filled-triangle obj pt1 pt2 pt3 color)
-  (add-filled-triangle obj pt3 pt4 pt1 color)
+  (add-triangle obj pt1 pt2 pt3 color)
+  (add-triangle obj pt3 pt4 pt1 color)
 
-  (add-filled-triangle obj pt5 pt6 pt7 color)
-  (add-filled-triangle obj pt7 pt8 pt5 color)
+  (add-triangle obj pt5 pt6 pt7 color)
+  (add-triangle obj pt7 pt8 pt5 color)
 
-  (add-filled-triangle obj pt1 pt2 pt6 color)
-  (add-filled-triangle obj pt6 pt8 pt1 color))
+  (add-triangle obj pt1 pt2 pt6 color)
+  (add-triangle obj pt6 pt8 pt1 color))
 
 (defun add-solid-box (obj color
                       pt1 pt2 pt3 pt4
