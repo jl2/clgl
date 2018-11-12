@@ -80,7 +80,7 @@
 
 (defun add-triangle (object pt1 pt2 pt3 color)
   (declare (type primitives object)
-           (type point pt1 pt2)
+           (type point pt1 pt2 pt3)
            (type color color))
   (let ((normal (triangle-normal pt1 pt2 pt3)))
 
