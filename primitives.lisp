@@ -76,7 +76,7 @@
 (defun triangle-normal (pt1 pt2 pt3)
   "Compute the normal of a triangle."
   (declare (type point pt1 pt2 pt3))
-  (vc (v- pt1 pt2) (v- pt3 pt1)))
+  (vc (v- pt1 pt2) (v- pt1 pt3)))
 
 (defun add-triangle (object pt1 pt2 pt3 color)
   (declare (type primitives object)
