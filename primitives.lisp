@@ -141,7 +141,7 @@
       (gl:buffer-data :array-buffer :dynamic-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
 
-    (loop for indices in (list points lines)
+    (loop for indices in (list points lines triangles)
        for ebo in ebos
        do
          (let ((gl-indices (to-gl-array indices :unsigned-int)))
@@ -153,8 +153,8 @@
       (gl:bind-buffer :array-buffer (cadr vbos))
       (gl:buffer-data :array-buffer :dynamic-draw gl-vertices)
       (gl:free-gl-array gl-vertices))
-    (loop for indices in (list triangles filled-triangles)
-       for ebo in (cddr ebos)
+    (loop for indices in (list filled-triangles)
+       for ebo in (cdddr ebos)
        do
          (let ((gl-indices (to-gl-array indices :unsigned-int)))
            (gl:bind-buffer :element-array-buffer ebo)
@@ -181,7 +181,7 @@
         (gl:draw-elements :lines (gl:make-null-gl-array :unsigned-int) :count (length lines)))
 
       (when (> (length triangles) 0)
-        (gl:bind-buffer :array-buffer (cadr vbos))
+        (gl:bind-buffer :array-buffer (car vbos))
         (use-program line-program transformation viewport)
         (gl:bind-buffer :element-array-buffer (triangle-ebo ebos))
         (gl:polygon-mode :front-and-back :line)
