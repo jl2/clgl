@@ -300,21 +300,37 @@
   (add-filled-triangle obj pt1 pt2 pt3 color)
   (add-filled-triangle obj pt3 pt4 pt1 color))
 
+;;   8---7
+;;  /|  /|
+;; 5-4-6-3
+;; |/  |/
+;; 1---2
+
 (defun add-wire-box (obj color
                      pt1 pt2 pt3 pt4
                      pt5 pt6 pt7 pt8)
+
   (add-triangle obj pt1 pt2 pt3 color)
   (add-triangle obj pt3 pt4 pt1 color)
-
   (add-triangle obj pt5 pt6 pt7 color)
   (add-triangle obj pt7 pt8 pt5 color)
 
   (add-triangle obj pt1 pt2 pt6 color)
-  (add-triangle obj pt6 pt8 pt1 color))
+  (add-triangle obj pt6 pt5 pt1 color)
+
+  (add-triangle obj pt3 pt4 pt8 color)
+  (add-triangle obj pt8 pt7 pt3 color)
+
+  (add-triangle obj pt2 pt3 pt7 color)
+  (add-triangle obj pt7 pt6 pt2 color)
+
+  (add-triangle obj pt1 pt5 pt8 color)
+  (add-triangle obj pt8 pt4 pt1 color))
 
 (defun add-solid-box (obj color
                       pt1 pt2 pt3 pt4
                       pt5 pt6 pt7 pt8)
+
   (add-filled-triangle obj pt1 pt2 pt3 color)
   (add-filled-triangle obj pt3 pt4 pt1 color)
 
@@ -322,7 +338,16 @@
   (add-filled-triangle obj pt7 pt8 pt5 color)
 
   (add-filled-triangle obj pt1 pt2 pt6 color)
-  (add-filled-triangle obj pt6 pt8 pt1 color))
+  (add-filled-triangle obj pt6 pt5 pt1 color)
+
+  (add-filled-triangle obj pt4 pt3 pt7 color)
+  (add-filled-triangle obj pt7 pt8 pt4 color)
+
+  (add-filled-triangle obj pt2 pt3 pt7 color)
+  (add-filled-triangle obj pt7 pt6 pt2 color)
+
+  (add-filled-triangle obj pt1 pt4 pt8 color)
+  (add-filled-triangle obj pt8 pt5 pt1 color))
 
 
 (defun make-parametric (&key
@@ -571,6 +596,7 @@
                            (line-color (vec4 0.25 1.0 0.25 0.25)))
 
   "Draw a strange-attractor fractal into file-name, zoomed into the window specified by xxmin,xxmax and yymin,yymax.  iterations is the number of iterations to run.  a, b, c, d, and e are the parameters of the strange attractor and can be modified for various effects."
+  (declare (ignorable line-color))
   (let ((prims (make-instance 'primitives))
         (the-point (vec4 0 0 0 1.0)))
     (loop
